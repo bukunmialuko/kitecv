@@ -32,6 +32,10 @@ export interface Experience {
   end: string;
   highlights: string[];
   technologies: string[];
+  /** Extra blank lines before this entry in the source, 0-3. Each adds a step. */
+  spacing: number;
+  /** A `---` line before this entry forces it onto a new page. */
+  pageBreak: boolean;
 }
 
 export interface Project {
@@ -44,6 +48,10 @@ export interface Project {
   description: string;
   highlights: string[];
   technologies: string[];
+  /** Extra blank lines before this entry in the source, 0-3. Each adds a step. */
+  spacing: number;
+  /** A `---` line before this entry forces it onto a new page. */
+  pageBreak: boolean;
 }
 
 export interface Education {
@@ -56,6 +64,10 @@ export interface Education {
   end: string;
   highlights: string[];
   technologies: string[];
+  /** Extra blank lines before this entry in the source, 0-3. Each adds a step. */
+  spacing: number;
+  /** A `---` line before this entry forces it onto a new page. */
+  pageBreak: boolean;
 }
 
 export type SectionKey =
@@ -79,6 +91,8 @@ export interface Cv {
   certifications: string[];
   /** The order the `##` headings appeared in — the renderer follows this. */
   sectionOrder: SectionKey[];
+  /** Sections preceded by a `---`, which start on a new page. */
+  sectionBreaks: SectionKey[];
 }
 
 /** Front-matter toggles. */

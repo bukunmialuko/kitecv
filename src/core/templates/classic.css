@@ -226,10 +226,75 @@ a[href]:hover {
 
 /* ---------------------------------------------------------------- entries --- */
 
+/*
+ * Entries are allowed to span a page boundary. Forbidding it wholesale pushed a
+ * tall role to the next page and left a band of dead space behind it, so instead
+ * of one blunt rule there are three narrow ones below: the header can never be
+ * stranded, a bullet can never split mid-sentence, and chips never land alone.
+ * The split therefore always falls between bullets.
+ */
 .entry {
   margin-bottom: var(--gap-md);
+}
+
+/*
+ * A header must never be the last thing on a page.
+ *
+ * NOTE: `break-after: avoid` and `break-before: avoid` are honoured by Chrome —
+ * which is what produces the PDF — but are NO-OPS in Paged.js: its
+ * `needsPreviousBreakAfter` only tests the forcing values (always/page/left/…)
+ * and never `avoid`. `break-inside: avoid` is the one primitive both engines
+ * implement. The consequence is documented in CLAUDE.md: the preview can show a
+ * section heading at the foot of a page where the PDF correctly moves it down.
+ */
+.entry-head,
+.entry-sub {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.entry ul {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Same idea for a section heading: never let it sit alone at the foot of a page
+ * with its first entry overleaf. Stated on the entry as well as the heading so
+ * Chrome has the constraint from both sides. */
+.section > .entry:first-of-type {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Never cut a single bullet in half. */
+.entry li {
   break-inside: avoid;
   page-break-inside: avoid;
+}
+
+/* Chips belong to the entry above them, not the page below. */
+.chips {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/*
+ * Author controls, from the markdown: extra blank lines add a step of space, a
+ * `---` line starts a new page. See CV-FORMAT.md.
+ */
+.entry.gap-1 { margin-top: var(--gap-md); }
+.entry.gap-2 { margin-top: var(--gap-lg); }
+.entry.gap-3 { margin-top: calc(var(--gap-lg) * 2); }
+
+.page-break {
+  break-before: page;
+  page-break-before: always;
+}
+
+/* A forced break puts the entry at the top of a page; its spacing would push it
+ * down from there, which is never what was meant. */
+.entry.page-break {
+  margin-top: 0;
 }
 
 .entry:last-child {

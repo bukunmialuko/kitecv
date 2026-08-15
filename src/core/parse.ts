@@ -63,6 +63,16 @@ const RANGE_TIGHT_RE = /^(\d{4})\s*[–—-]\s*(.+)$/;
 
 const CONTACT_SPLIT_RE = /\s*[|·•]\s*/;
 
+/** A `---` line on its own forces whatever follows onto a new page. */
+const PAGE_BREAK_RE = /^-{3,}$/;
+
+/**
+ * One blank line between entries is the norm and means nothing; each further
+ * blank adds a step of space. Capped so a stray run of newlines cannot blow a
+ * page apart.
+ */
+const MAX_SPACING = 3;
+
 function finding(
   type: string,
   message: string,
@@ -197,16 +207,29 @@ interface RawEntry {
   subRight: string;
   highlights: string[];
   technologies: string[];
+  spacing: number;
+  pageBreak: boolean;
 }
 
 /** Turn a section body into the shared entry shape. */
 function parseEntries(lines: string[], section: string, findings: Finding[]): RawEntry[] {
   const entries: RawEntry[] = [];
   let current: RawEntry | null = null;
+  let blanks = 0;
+  let pageBreak = false;
 
   for (const line of lines) {
     const stripped = line.trim();
-    if (!stripped) continue;
+    if (!stripped) {
+      blanks += 1;
+      continue;
+    }
+
+    if (PAGE_BREAK_RE.test(stripped)) {
+      pageBreak = true;
+      blanks = 0;
+      continue;
+    }
 
     if (stripped.startsWith("### ")) {
       const rest = stripped.slice(4);
@@ -227,8 +250,15 @@ function parseEntries(lines: string[], section: string, findings: Finding[]): Ra
         subRight: "",
         highlights: [],
         technologies: [],
+        // Blank lines before the *first* entry sit under the section heading, so
+        // they are ignored — otherwise invisible whitespace would shift the gap
+        // below `## Experience`.
+        spacing: entries.length === 0 ? 0 : Math.min(MAX_SPACING, Math.max(0, blanks - 1)),
+        pageBreak,
       };
       entries.push(current);
+      blanks = 0;
+      pageBreak = false;
       continue;
     }
 
@@ -238,6 +268,8 @@ function parseEntries(lines: string[], section: string, findings: Finding[]): Ra
       findings.push(finding("orphan_text", `Ignored text before the first entry: ${stripped}`, section));
       continue;
     }
+
+    blanks = 0;
 
     const bullet = BULLET_RE.exec(stripped);
     if (bullet) {
@@ -291,6 +323,8 @@ function toExperience(entry: RawEntry): Experience {
     end,
     highlights: entry.highlights,
     technologies: entry.technologies,
+    spacing: entry.spacing,
+    pageBreak: entry.pageBreak,
   };
 }
 
@@ -313,6 +347,8 @@ function toProject(entry: RawEntry): Project {
     description: entry.subLeft,
     highlights: entry.highlights,
     technologies: entry.technologies,
+    spacing: entry.spacing,
+    pageBreak: entry.pageBreak,
   };
 }
 
@@ -335,6 +371,8 @@ function toEducation(entry: RawEntry): Education {
     end,
     highlights: entry.highlights,
     technologies: entry.technologies,
+    spacing: entry.spacing,
+    pageBreak: entry.pageBreak,
   };
 }
 
@@ -350,6 +388,7 @@ function emptyCv(): Cv {
     education: [],
     certifications: [],
     sectionOrder: [],
+    sectionBreaks: [],
   };
 }
 
@@ -381,16 +420,35 @@ export function parseCv(text: string): ParseResult {
   const headerLines: string[] = [];
   const sections = new Map<SectionKey, string[]>();
   const order: SectionKey[] = [];
+  const sectionBreaks: SectionKey[] = [];
   let currentKey: SectionKey | null = null;
+
+  // A `---` is held rather than dispatched immediately: if a `##` heading comes
+  // next it breaks the page before that whole section, otherwise it belongs to
+  // the section body and `parseEntries` attaches it to the next entry.
+  let pendingBreak = false;
+  const flushBreak = () => {
+    if (!pendingBreak) return;
+    if (currentKey !== null) sections.get(currentKey)!.push("---");
+    pendingBreak = false;
+  };
 
   for (const raw of body.split(/\r?\n/)) {
     const stripped = raw.trim();
+
+    if (PAGE_BREAK_RE.test(stripped)) {
+      flushBreak();
+      pendingBreak = true;
+      continue;
+    }
+
     if (stripped.startsWith("## ")) {
       const heading = stripped.slice(3).trim();
       const key = ALIAS_TO_KEY.get(heading.toLowerCase());
       if (!key) {
         findings.push(finding("unknown_section", `Ignored unrecognised section heading: ${heading}`));
         currentKey = null;
+        pendingBreak = false;
         continue;
       }
       currentKey = key;
@@ -398,14 +456,20 @@ export function parseCv(text: string): ParseResult {
         sections.set(key, []);
         order.push(key);
       }
+      if (pendingBreak) {
+        if (!sectionBreaks.includes(key)) sectionBreaks.push(key);
+        pendingBreak = false;
+      }
       continue;
     }
+    if (stripped) flushBreak();
     if (currentKey === null) headerLines.push(raw);
     else sections.get(currentKey)!.push(raw);
   }
+  flushBreak();
 
   const header = parseHeader(headerLines);
-  const data: Cv = { ...emptyCv(), ...header, sectionOrder: order };
+  const data: Cv = { ...emptyCv(), ...header, sectionOrder: order, sectionBreaks };
 
   for (const key of order) {
     const lines = sections.get(key)!;
