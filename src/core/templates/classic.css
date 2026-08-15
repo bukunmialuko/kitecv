@@ -1,0 +1,326 @@
+/* SkillBridge CV — print-first stylesheet.
+ *
+ * Two rules run through everything here:
+ *   1. One content grid. Section rules, headings, entry rows, bullets, chips and
+ *      skills all share a single left edge and a single right edge.
+ *   2. The document is always black-on-white. It is a printed page, so it does
+ *      not follow the repo's light/dark theme convention — only the preview
+ *      shell around it is themed.
+ *
+ * `--page-size`, `--page-margin` and `--content-width` are emitted by html.py
+ * ahead of this file, because `@page { size: … }` cannot read a custom property.
+ */
+
+:root {
+  /* The single place the font is named. Every rule below uses var(--font-sans),
+   * so swapping typeface = change this line + drop in a new .woff2. */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  /* The weight scale, kept as tokens for the same reason as the family: one
+   * place to change. Inter ships here as a genuine variable font (fvar/gvar), so
+   * every step below is a real interpolated instance — nothing is synthesised
+   * faux-bold by the browser.
+   *
+   *   800 heavy    name
+   *   700 bold     section titles, company names, skill labels
+   *   600 semibold job title under the name, dates
+   *   500 medium   role, location, tech chips
+   *   400 regular  bullets, contact details, summary
+   */
+  --fw-heavy: 800;
+  --fw-bold: 700;
+  --fw-semi: 600;
+  --fw-medium: 500;
+  --fw-regular: 400;
+
+  --fs-base: 9.6pt;
+  --fs-name: 25pt;
+  --fs-title: 10.5pt;
+  --fs-section: 10.5pt;
+  --fs-contact: 8.4pt;
+  --fs-chip: 7.4pt;
+
+  --ink: #16181d;
+  --ink-soft: #40454e;
+  --rule: #16181d;
+  /* The chip reads as a soft filled capsule, not an outlined one: the border is
+   * only a shade darker than the fill, so the edge blends rather than drawing a
+   * hard line around each tag. */
+  --chip-bg: #f4f5f7;
+  --chip-border: #e7e9ed;
+  --chip-ink: #3b4048;
+
+  /* Vertical rhythm comes from these four values rather than per-rule numbers,
+   * so spacing stays even across sections. */
+  --gap-xs: 2pt;
+  --gap-sm: 4pt;
+  --gap-md: 8pt;
+  --gap-lg: 13pt;
+
+  --bullet-indent: 11pt;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+html {
+  background: #fff;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: 1.42;
+  /* Inter's optical sizing and kerning are worth having on at body sizes. */
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+/* On screen the document is sized to the printable area so what you see is what
+ * prints. In print the page box already applies the margin, so the wrapper
+ * collapses to nothing. */
+.cv {
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--page-margin) 0;
+}
+
+@media print {
+  .cv {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Links stay live — clickable in the browser and in Print → PDF — but inherit
+ * their colour so the printed page does not turn blue. */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a[href]:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- header --- */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-lg);
+}
+
+.header-left {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--fs-name);
+  font-weight: var(--fw-heavy);
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 1.02;
+}
+
+/* The </ … > decoration is styling, not content — the markdown holds the plain
+ * job title, so nothing downstream has to know about it. */
+.job-title {
+  margin-top: 3pt;
+  font-size: var(--fs-title);
+  font-weight: var(--fw-semi);
+  color: var(--ink-soft);
+}
+
+.job-title::before {
+  content: "</ ";
+}
+
+.job-title::after {
+  content: " >";
+}
+
+/* Contact rows are flush right and each row's last child is its icon, so those
+ * icons form a straight vertical column down the right edge. */
+.contact {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5pt;
+  font-size: var(--fs-contact);
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5pt;
+}
+
+/* The icons carry different amounts of internal padding inside their shared
+ * 24x24 box, so the gap is set generously enough that the tightest of them (the
+ * phone) still reads as separate from the text. */
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5pt;
+  white-space: nowrap;
+}
+
+.contact-sep {
+  color: #9aa0aa;
+}
+
+.icon {
+  width: 8.4pt;
+  height: 8.4pt;
+  flex: none;
+  fill: currentColor;
+}
+
+/* --------------------------------------------------------------- sections --- */
+
+.section {
+  margin-top: var(--gap-lg);
+}
+
+.section-title {
+  margin: 0 0 var(--gap-md);
+  padding-bottom: 2.5pt;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  /* Never leave a heading stranded at the foot of a page. */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.summary {
+  margin: 0;
+}
+
+/* Skills wrap flat to the left content edge — no hanging indent under the bold
+ * label, matching the reference layout. */
+.skill-line {
+  margin-bottom: var(--gap-xs);
+}
+
+.skill-label {
+  font-weight: var(--fw-bold);
+}
+
+/* ---------------------------------------------------------------- entries --- */
+
+.entry {
+  margin-bottom: var(--gap-md);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+/* A real two-column row, not `justify-content: space-between`. The left column
+ * absorbs the slack and is allowed to shrink (min-width: 0); the right column
+ * never wraps. A long company name therefore wraps within its own column
+ * instead of shoving the date off the right edge. */
+.entry-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-md);
+}
+
+.entry-row .left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.entry-row .right {
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  /* Equal-width digits, so the date column reads as a straight edge down the
+   * page rather than a ragged one. */
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-head .left {
+  font-weight: var(--fw-bold);
+}
+
+.entry-head .right {
+  font-weight: var(--fw-semi);
+}
+
+.entry-sub .left,
+.entry-sub .right {
+  color: var(--ink-soft);
+  font-weight: var(--fw-medium);
+}
+
+/* Hanging indent: the marker is absolutely positioned out into the gutter, so a
+ * wrapped second line aligns under the first line's text, never under the ■. */
+.entry ul {
+  margin: var(--gap-sm) 0 0;
+  padding-left: var(--bullet-indent);
+  list-style: none;
+}
+
+.entry li {
+  position: relative;
+  margin-bottom: var(--gap-xs);
+}
+
+.entry li::before {
+  content: "\25A0";
+  position: absolute;
+  left: calc(var(--bullet-indent) * -1);
+  top: 0;
+  font-size: 5.4pt;
+  line-height: 2.5;
+  color: var(--ink);
+}
+
+.entry li:last-child {
+  margin-bottom: 0;
+}
+
+/* Chips align to the content left edge and wrap with an even gap. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3pt 3.5pt;
+  margin-top: var(--gap-sm);
+}
+
+.chip {
+  padding: 1.8pt 6.5pt;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  font-size: var(--fs-chip);
+  font-weight: var(--fw-medium);
+  color: var(--chip-ink);
+  white-space: nowrap;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}

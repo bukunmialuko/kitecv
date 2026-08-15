@@ -1,0 +1,85 @@
+/*
+ * `source(none)` plus explicit @source: Tailwind v4 otherwise scans the whole
+ * project, so the word "rounded" in README.md or CLAUDE.md emits a .rounded
+ * utility nobody uses. Scoping to app source keeps prose out of the bundle.
+ */
+@import "tailwindcss" source(none);
+@source "../index.html";
+@source "./**/*.{ts,tsx}";
+
+/* Class-based dark mode so the toggle wins over the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * The shell palette: black, white and grey, nothing else.
+ * The three severity colours below are the sole exception — there, colour
+ * carries meaning rather than mood.
+ */
+@theme {
+  --color-ground: #ffffff;
+  --color-panel: #fafafa;
+  --color-ink: #111111;
+  --color-muted: #6b6b6b;
+  --color-hairline: #e5e5e5;
+
+  --color-sev-error: #b42318;
+  --color-sev-warning: #b54708;
+  --color-sev-info: #175cd3;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.dark {
+  --color-ground: #0a0a0a;
+  --color-panel: #111111;
+  --color-ink: #ededed;
+  --color-muted: #8a8a8a;
+  --color-hairline: #262626;
+
+  --color-sev-error: #f97066;
+  --color-sev-warning: #fdb022;
+  --color-sev-info: #53b1fd;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+/* No border radius and no drop shadows in the shell — depth comes from hairlines
+ * and the dot grid. See CLAUDE.md → Style. */
+@layer base {
+  button,
+  select,
+  input,
+  textarea {
+    border-radius: 0;
+  }
+}
+
+/* The engineering-documentation ground. One radial-gradient, no image asset. */
+.dotgrid {
+  background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Small uppercase monospace — labels, tabs, page numbers, metadata. */
+.meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Huge tight-tracked display type, the primary visual element. */
+.display {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
