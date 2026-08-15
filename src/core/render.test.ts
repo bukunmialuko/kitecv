@@ -3,6 +3,7 @@ import fixture from "./__fixtures__/sample.body.html?raw";
 import { sampleMarkdown } from "./assets";
 import { parseCv } from "./parse";
 import { esc, inline, renderBody, renderDocument } from "./render";
+import { loadTemplate, templateMeta } from "./templates";
 
 const norm = (html: string): string => html.replace(/\s+/g, " ").trim();
 
@@ -122,5 +123,50 @@ describe("renderDocument is self-contained", () => {
     expect(doc).not.toContain('src="http');
     expect(doc).not.toContain("<link rel=\"stylesheet\"");
     expect(doc).not.toMatch(/class="[^"]*\b(?:flex-\w|bg-\[|text-\[|dark:)/);
+  });
+});
+
+/**
+ * Fonts hang off the template rather than the document, and this is the test
+ * that keeps them there. Each family costs 50-150KB once base64-inlined, so the
+ * moment a shared block creeps back every Classic export silently starts
+ * carrying Plex's four faces.
+ */
+describe("templates carry their own fonts", () => {
+  const doc = async (id: string) =>
+    renderDocument(cv(sampleMarkdown), { template: await loadTemplate(id) });
+  const faces = (html: string) => html.match(/@font-face/g)?.length ?? 0;
+
+  it("embeds one face for Classic and four for Plex", async () => {
+    expect(faces(await doc("classic"))).toBe(1);
+    expect(faces(await doc("plex"))).toBe(4);
+  });
+
+  it("keeps a Classic export free of the Plex families", async () => {
+    const classic = await doc("classic");
+    expect(classic).not.toContain("Archivo");
+    expect(classic).not.toContain("IBM Plex");
+  });
+
+  it("declares every family the Plex stylesheet asks for", async () => {
+    const plex = await doc("plex");
+    for (const family of ["Archivo", "IBM Plex Sans", "IBM Plex Mono"]) {
+      expect(plex).toContain(`font-family: '${family}'`);
+    }
+  });
+
+  it("gives every registered template a font block, so none renders in a fallback", async () => {
+    for (const meta of templateMeta) {
+      const template = await loadTemplate(meta.id);
+      expect(template.fontCss).toContain("data:font/woff2;base64,");
+    }
+  });
+
+  // An unknown id must not render an unstyled CV: a `templateId` left in
+  // localStorage by a build that shipped a template this one doesn't have
+  // should degrade to the default.
+  it("falls back to Classic for an unknown id", async () => {
+    expect((await loadTemplate("nope")).id).toBe("classic");
+    expect((await loadTemplate(undefined)).id).toBe("classic");
   });
 });

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { templateList } from "../core/templates";
+import { templateMeta } from "../core/templates";
 
 export type PdfState = { status: "idle" | "working" } | { status: "error"; message: string };
 
@@ -51,7 +51,7 @@ export default function Toolbar({
           onChange={(e) => onTemplate(e.target.value)}
           className="border border-hairline bg-ground px-3 py-1.5 text-xs hover:border-ink"
         >
-          {templateList.map((template) => (
+          {templateMeta.map((template) => (
             <option key={template.id} value={template.id}>
               {template.name}
             </option>

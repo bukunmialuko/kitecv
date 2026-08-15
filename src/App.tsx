@@ -10,7 +10,7 @@ import { buildBundle } from "./core/bundle";
 import { parseCv } from "./core/parse";
 import { renderDocument } from "./core/render";
 import { buildReport } from "./core/report";
-import { DEFAULT_TEMPLATE_ID, getTemplate } from "./core/templates";
+import { DEFAULT_TEMPLATE_ID, defaultTemplate, loadTemplate } from "./core/templates";
 
 const KEY_MD = "kite:markdown";
 const KEY_TEMPLATE = "kite:template";
@@ -49,6 +49,20 @@ export default function App() {
     localStorage.setItem(KEY_TEMPLATE, templateId);
   }, [templateId]);
 
+  // Every template but the default is a separate chunk, so switching is async.
+  // The previously loaded template stays on screen until the new one arrives —
+  // the swap is one repaint with no blank frame and no spinner.
+  const [template, setTemplate] = useState(defaultTemplate);
+  useEffect(() => {
+    let cancelled = false;
+    loadTemplate(templateId).then((next) => {
+      if (!cancelled) setTemplate(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [templateId]);
+
   // Debounced together: the localStorage write and the value the preview reads.
   const [settled, setSettled] = useState(markdown ?? "");
   useEffect(() => {
@@ -68,11 +82,11 @@ export default function App() {
   const html = useMemo(
     () =>
       renderDocument(settledParse.data, {
-        template: getTemplate(templateId),
+        template,
         showProjects: settledParse.options.projects !== false,
         showChips: settledParse.options.chips !== false,
       }),
-    [settledParse, templateId],
+    [settledParse, template],
   );
 
   const htmlRef = useRef(html);

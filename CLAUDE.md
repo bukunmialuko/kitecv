@@ -39,12 +39,28 @@ generated-with trailer.
 These are load-bearing. Breaking one silently degrades the output.
 
 - **`src/core/` imports no React and touches no DOM.** It is the future VS Code
-  package. `assets.ts` is the only file allowed to know about Vite (`?raw`,
-  `?inline`).
+  package. `assets.ts` and `assets.plex.ts` are the only files allowed to know
+  about Vite (`?raw`, `?inline`).
 - **Tailwind stops at the iframe.** The shell uses Tailwind; the CV document uses
   plain CSS in `core/templates/*.css`. The CV must render standalone in the
   iframe, on the server and in the saved PDF — none of which can reach the app's
   compiled stylesheet.
+- **Fonts belong to the template, not the document.** `Template.fontCss` carries
+  the `@font-face` block and `renderDocument` emits only the active template's.
+  Each family costs 50-150KB base64-inlined, so hoisting them into one shared
+  block would put Plex's four faces into every Classic export. `render.test.ts`
+  pins the per-template face counts.
+- **A template only asks for weights its files actually contain.** Archivo, Inter
+  and IBM Plex Sans ship here as variable fonts, so any weight in range is a real
+  instance. IBM Plex Mono has no variable build — only 400 and 500 are embedded,
+  and asking for 600 would get a synthesised approximation instead.
+- **Only the default template is imported eagerly.** Every other one is fetched
+  by `loadTemplate()` through a dynamic `import()`, which is the only reason its
+  fonts stay out of the main bundle — base64 font data barely compresses, so
+  Plex alone is ~116KB gzipped. A single static `import … from "./assets.plex"`
+  anywhere in the eager graph silently folds that chunk back into the main
+  bundle, and the only symptom is the build's size report. Check it after
+  touching `core/templates/index.ts` or either `assets*.ts`.
 - **The preview page never reflows.** It is fixed at 794px (A4) and scaled with a
   CSS transform to fit the pane. If line breaks change when the pane resizes, the
   preview is lying about the PDF.

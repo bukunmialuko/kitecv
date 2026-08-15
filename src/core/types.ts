@@ -147,6 +147,13 @@ export interface Template {
   id: string;
   name: string;
   css: string;
+  /**
+   * The `@font-face` rules this template's CSS depends on, with every font
+   * base64-inlined. It belongs to the template rather than the document because
+   * each family is ~50-150KB once inlined: emitting all of them would make a
+   * Classic export carry Plex's four faces for nothing.
+   */
+  fontCss: string;
 }
 
 export interface RenderOptions {
