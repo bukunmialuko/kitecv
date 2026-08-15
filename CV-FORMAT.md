@@ -1,8 +1,8 @@
 # CV markdown format
 
-The input contract for `render.py`. It is deliberately small: one heading level
-per job, one uniform grammar shared by every entry section, and nothing that
-needs escaping in normal use.
+The input contract for the parser in `src/core/parse.ts`. It is deliberately
+small: one heading level per job, one uniform grammar shared by every entry
+section, and nothing that needs escaping in normal use.
 
 This file is the **single source of truth** for the format. A future Claude skill
 that converts an arbitrary PDF CV into this shape targets exactly what is written
@@ -200,18 +200,19 @@ escaped first, so `&`, `<` and `>` are safe to type.
 
 ## Report
 
-`render.py` writes `output/cv_report.json` next to the CV. It checks dates and
-completeness — see the [README](README.md#report) for the full table. Nothing in
-it changes the rendered CV.
+`buildReport` in `src/core/report.ts` checks dates and completeness — employment
+gaps, reversed ranges, entries out of order, missing sections — and the findings
+appear in the app's **Analysis** tab as you type. Nothing in it changes the
+rendered CV.
 
 ---
 
-## How the shipped template exercises the style guide
+## How the bundled sample exercises the format
 
-`input/cv.template.md` is a worked example of
-[docs/resume-best-practices.md](../docs/resume-best-practices.md). Each entry
-demonstrates a different pattern from the guide, so the file teaches the format
-and the writing standard at once:
+[`src/core/sample.md`](src/core/sample.md) — the CV you get from "Start with
+sample", and the one the test fixture is pinned to — is a worked example rather
+than filler. Each entry demonstrates a different bullet pattern, so the file
+teaches the format and the writing standard at once:
 
 | Entry | Demonstrates |
 |---|---|
@@ -221,9 +222,9 @@ and the writing standard at once:
 | Tessellate Labs | Past-tense action verbs and quantified impact throughout |
 | Bramble & Co | An entry with **no company link and no `Tech:` line** |
 
-The three projects each clear the guide's "real project" bar — solves a problem,
-has users, actively maintained — and Cadence deliberately carries no link or
-period, to cover that branch.
+The three projects each read as a real one — solves a problem, has users, still
+maintained — and Cadence deliberately carries no link and no period line, so the
+sample covers that branch of the grammar too.
 
 ---
 
