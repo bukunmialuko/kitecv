@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Analysis from "./components/Analysis";
 import Editor from "./components/Editor";
 import Landing from "./components/Landing";
+import Guide from "./components/Guide";
 import Preview from "./components/Preview";
 import Toolbar, { type PdfState } from "./components/Toolbar";
 import { sampleMarkdown } from "./core/assets";
+import { buildBundle } from "./core/bundle";
 import { parseCv } from "./core/parse";
 import { renderDocument } from "./core/render";
 import { buildReport } from "./core/report";
@@ -34,7 +36,7 @@ export default function App() {
     () => localStorage.getItem(KEY_TEMPLATE) ?? DEFAULT_TEMPLATE_ID,
   );
   const [dark, setDark] = useState(() => localStorage.getItem(KEY_THEME) === "dark");
-  const [tab, setTab] = useState<"preview" | "analysis">("preview");
+  const [tab, setTab] = useState<"preview" | "analysis" | "guide">("preview");
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [pageCount, setPageCount] = useState(0);
 
@@ -75,6 +77,8 @@ export default function App() {
 
   const htmlRef = useRef(html);
   htmlRef.current = html;
+  const markdownRef = useRef(markdown ?? "");
+  markdownRef.current = markdown ?? "";
 
   const downloadPdf = useCallback(async () => {
     setPdf({ status: "working" });
@@ -87,9 +91,15 @@ export default function App() {
       if (!response.ok) {
         throw new Error((await response.text()).slice(0, 120) || `HTTP ${response.status}`);
       }
-      const blob = await response.blob();
-      const name = (settledParse.data.name || "cv").trim().replace(/\s+/g, "-").toLowerCase();
-      download(blob, `${name}.pdf`);
+      // The PDF and the markdown that produced it travel together, so the file
+      // you archive is one you can edit again.
+      const pdfBytes = new Uint8Array(await response.arrayBuffer());
+      const bundle = buildBundle({
+        name: settledParse.data.name,
+        markdown: markdownRef.current,
+        pdf: pdfBytes,
+      });
+      download(new Blob([bundle.bytes], { type: "application/zip" }), bundle.filename);
       setPdf({ status: "idle" });
     } catch (error) {
       // Never a silent no-op, and never a corrupt file handed over as if it worked.
@@ -109,11 +119,15 @@ export default function App() {
         onSample={() => load(sampleMarkdown)}
         onBlank={() => load("")}
         onUpload={load}
+        onGuide={() => {
+          load(sampleMarkdown);
+          setTab("guide");
+        }}
       />
     );
   }
 
-  const tabButton = (id: "preview" | "analysis", label: string, badge?: number) => (
+  const tabButton = (id: "preview" | "analysis" | "guide", label: string, badge?: number) => (
     <button
       onClick={() => setTab(id)}
       className={`meta px-4 py-2.5 border-b-2 ${
@@ -153,6 +167,7 @@ export default function App() {
           <div className="flex items-center border-b border-hairline">
             {tabButton("preview", "Preview")}
             {tabButton("analysis", "Analysis", report.findings.length)}
+            {tabButton("guide", "Guide")}
             <div className="flex-1" />
             {tab === "preview" && pageCount > 0 && (
               <span className="meta text-muted px-4">
@@ -169,6 +184,9 @@ export default function App() {
             </div>
             <div className={tab === "analysis" ? "h-full" : "hidden"}>
               <Analysis report={report} />
+            </div>
+            <div className={tab === "guide" ? "h-full" : "hidden"}>
+              <Guide />
             </div>
           </div>
         </div>

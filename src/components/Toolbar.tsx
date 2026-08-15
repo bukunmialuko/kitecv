@@ -82,9 +82,12 @@ export default function Toolbar({
         <button
           onClick={onDownloadPdf}
           disabled={working}
+          // The archive holds the PDF and the markdown that produced it, so
+          // "Download PDF" would understate what you get.
+          title="PDF + Markdown (.zip)"
           className="border border-ink bg-ink px-4 py-1.5 text-xs text-ground hover:opacity-85 disabled:opacity-50"
         >
-          {working ? "Rendering…" : pdf.status === "error" ? "Retry PDF" : "Download PDF"}
+          {working ? "Rendering…" : pdf.status === "error" ? "Retry" : "Download"}
         </button>
       </div>
     </header>
