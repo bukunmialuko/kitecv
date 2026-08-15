@@ -2,6 +2,8 @@
 
 Write your CV in Markdown. Download a real PDF.
 
+**[kitecv.vercel.app](https://kitecv.vercel.app/)** — no install, no account.
+
 Not an image of a page — a PDF with **selectable text, live links and embedded
 fonts**, so the ATS that screens it can actually read it.
 
@@ -24,6 +26,10 @@ download is the file you previewed — down to the page breaks.
 - **No account.** Editing, preview and analysis run in your browser. The CV is
   sent to the server only when you press Download, rendered in memory, and never
   stored.
+- **Download gives you both.** A zip containing the PDF and the markdown that
+  produced it, so the file you archive is one you can edit again.
+- **A guide built in.** The Guide tab documents the whole format beside your
+  editor. Every example in it is checked by the test suite.
 
 ## Run it
 
@@ -37,6 +43,9 @@ npm run build
 PDF export needs the serverless function, so run `vercel dev` instead of
 `npm run dev` if you want to exercise Download locally. Everything else works
 without it.
+
+Deployed on Vercel; the PDF function runs headless Chromium, so the first request
+after an idle period takes a few seconds to cold-start.
 
 ## The format
 
@@ -69,6 +78,10 @@ M.Sc. Computer Science
 One grammar for every entry: `###` is the bold row, the next plain line is the
 sub-row, `-` are bullets, `Tech:` becomes chips. Section order follows your
 markdown, so moving a section is an edit, not a setting.
+
+Long entries flow across pages, splitting between bullets. To control that
+yourself: an extra blank line before an entry adds space, and a `---` line pushes
+whatever follows onto a new page.
 
 ## Layout
 

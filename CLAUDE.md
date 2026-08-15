@@ -57,6 +57,18 @@ These are load-bearing. Breaking one silently degrades the output.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
 - **The CV document stays black-on-white in both themes.** It is a printed page.
+- **Entries are allowed to span pages.** `break-inside: avoid` on `.entry` was
+  removed: it pushed tall roles whole and left dead space behind them. The narrow
+  rules that replaced it (header `break-after: avoid`, `li break-inside: avoid`,
+  `.chips break-before: avoid`) must stay, or splits land in ugly places.
+- **`break-after: avoid` and `break-before: avoid` are NO-OPS in Paged.js.** Its
+  `needsPreviousBreakAfter` only tests the forcing values, never `avoid`. Chrome
+  honours them, so the PDF is correct while the preview can show a section
+  heading stranded at a page foot. `break-inside: avoid` is the only primitive
+  both engines implement. Do not "fix" the CSS on the assumption it is honoured.
+- **Guide snippets are executable documentation.** `src/guide/topics.ts` is
+  parsed by `guide.test.ts`, which asserts each snippet still produces what its
+  prose claims. Change the format and the docs fail with it, by design.
 - **Preview furniture stays out of `renderDocument()`.** The dot grid, sheet
   borders and page numbers are injected into the iframe only — in the document
   they would print.
@@ -75,7 +87,11 @@ These are load-bearing. Breaking one silently degrades the output.
 
 ## Checks
 
+The Download button returns a **zip** of the PDF plus the markdown that produced
+it (`src/core/bundle.ts`), zipped client-side so `api/pdf.ts` stays HTML-in,
+PDF-out.
+
 ```bash
-npm test          # vitest — core suites plus the fixture test
+npm test          # vitest — core suites, the fixture test, and the guide check
 npm run build     # tsc --noEmit && vite build; must pass before proposing a commit
 ```

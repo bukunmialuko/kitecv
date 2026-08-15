@@ -140,6 +140,33 @@ the left margin. A leading `- ` is tolerated if you're in the habit.
 the order they render, so moving a section is an edit here, never a code change.
 An unrecognised heading is skipped and reported.
 
+## Spacing and page breaks
+
+Long entries flow across pages on their own, splitting between bullets — a header
+is never stranded and a bullet is never cut in half. Two controls override that:
+
+- **An extra blank line before an entry adds a step of space.** One blank line is
+  the norm and means nothing; each further one adds a step, up to three.
+- **A `---` line forces a new page.** Put it before a `###` to move one entry, or
+  before a `##` to move a whole section.
+
+```markdown
+### Northwind Systems | 2023 – Present
+Engineer | Remote
+- Did a thing.
+
+
+### Harbour Analytics | 2021 – 2023   ← one extra blank line = one step of space
+Engineer | Bristol, UK
+- Did another thing.
+
+---
+
+### Bramble & Co | 2016 – 2020        ← starts a new page
+```
+
+The `---` at the very top of a file is front matter, not a page break.
+
 ## Front matter
 
 Optional, and only two keys:
@@ -189,3 +216,11 @@ and the writing standard at once:
 The three projects each clear the guide's "real project" bar — solves a problem,
 has users, actively maintained — and Cadence deliberately carries no link or
 period, to cover that branch.
+
+---
+
+## The in-app guide
+
+The Guide tab in Kite covers all of the above with copyable examples beside your
+editor, and every example in it is verified by the test suite. This file is the
+reference; the Guide is the version to read while writing.

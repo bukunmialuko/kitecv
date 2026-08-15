@@ -5,6 +5,7 @@ interface Props {
   onSample: () => void;
   onBlank: () => void;
   onUpload: (text: string) => void;
+  onGuide: () => void;
 }
 
 const FEATURES: Array<[string, string]> = [
@@ -13,7 +14,7 @@ const FEATURES: Array<[string, string]> = [
   ["Timeline checks", "Gaps, reversed dates, entries out of order, missing sections."],
 ];
 
-export default function Landing({ onSample, onBlank, onUpload }: Props) {
+export default function Landing({ onSample, onBlank, onUpload, onGuide }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -72,7 +73,10 @@ export default function Landing({ onSample, onBlank, onUpload }: Props) {
         </div>
 
         <p className="meta text-muted mt-10">
-          Editing stays in your browser · the CV is sent only when you download
+          Editing stays in your browser · the CV is sent only when you download ·{" "}
+          <button onClick={onGuide} className="underline hover:text-ink">
+            read the guide
+          </button>
         </p>
       </div>
     </div>
