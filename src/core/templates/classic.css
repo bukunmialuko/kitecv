@@ -89,7 +89,9 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-base);
   font-weight: var(--fw-regular);
-  line-height: 1.42;
+  /* Loose enough that a two-line bullet reads as two lines rather than a block.
+   * 1.42 was set when bullets were expected to be one line each. */
+  line-height: 1.5;
   /* Inter's optical sizing and kerning are worth having on at body sizes. */
   font-kerning: normal;
   text-rendering: optimizeLegibility;
@@ -178,16 +180,18 @@ a[href]:hover {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5pt;
+  gap: 3.5pt;
 }
 
-/* The icons carry different amounts of internal padding inside their shared
- * 24x24 box, so the gap is set generously enough that the tightest of them (the
- * phone) still reads as separate from the text. */
+/* Each icon sits in a shared 24x24 box but its ink stops at a different inset —
+ * 5 units for the pin, 3 for the phone and LinkedIn, 2 for the mail and GitHub
+ * marks — so one gap value reads differently on every row. 3.5pt keeps the
+ * tightest of them (mail, GitHub) clear of the text while stopping the pin row
+ * from drifting apart, which is what the old 5pt did most visibly. */
 .contact-item {
   display: inline-flex;
   align-items: center;
-  gap: 5pt;
+  gap: 3.5pt;
   white-space: nowrap;
 }
 
@@ -391,9 +395,12 @@ a[href]:hover {
   font-weight: var(--fw-semi);
 }
 
+/* Role and location are metadata hanging off the company/date row above, so they
+ * take the same muted grey as a skill label. They keep body size and sentence
+ * case though — the job title is content a reader looks for, not a signpost. */
 .entry-sub .left,
 .entry-sub .right {
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   font-weight: var(--fw-medium);
 }
 
@@ -405,9 +412,11 @@ a[href]:hover {
   list-style: none;
 }
 
+/* The step between bullets has to beat the step between lines *within* a bullet,
+ * or a multi-line list fuses into one grey block and the eye loses the entries. */
 .entry li {
   position: relative;
-  margin-bottom: var(--gap-xs);
+  margin-bottom: var(--gap-sm);
 }
 
 /*
