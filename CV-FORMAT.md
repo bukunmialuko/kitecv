@@ -120,8 +120,16 @@ Languages: Python, Go, TypeScript
 Backend: PostgreSQL, Redis, Kafka
 ```
 
-The part before the first colon renders bold; the rest is plain and wraps flat to
-the left margin. A leading `- ` is tolerated if you're in the habit.
+The part before the first colon is the category label. It renders in a fixed
+gutter down the left edge — small, uppercase and letterspaced by the stylesheet,
+so type it in whatever case reads best in the source — and the values get a
+column of their own beside it, wrapping within that column. The colon separates
+the two and is never printed. A line with no colon has no label and spans the
+full width. A leading `- ` is tolerated if you're in the habit.
+
+Certifications are written the same way but render differently: they read as
+statements rather than as a category index, so they keep a bold run-in label on
+one flowing line.
 
 ## Sections
 
