@@ -8,10 +8,13 @@ interface Props {
   onGuide: () => void;
 }
 
+// Four, so the grid below stays a filled 2x2 rather than a row with a hole in
+// it. Adding a fifth means picking a new column count, not just a new entry.
 const FEATURES: Array<[string, string]> = [
   ["Real PDF", "Selectable text, live links, embedded fonts. Readable by the ATS that screens it."],
   ["Page-exact preview", "Paginated as the PDF is, so you see where things land before you export."],
   ["Timeline checks", "Gaps, reversed dates, entries out of order, missing sections."],
+  ["Two typesettings", "Switch template and the preview, the PDF and the saved file all follow. Your markdown never changes."],
 ];
 
 export default function Landing({ onSample, onBlank, onUpload, onGuide }: Props) {
@@ -63,7 +66,7 @@ export default function Landing({ onSample, onBlank, onUpload, onGuide }: Props)
           />
         </div>
 
-        <div className="grid gap-px border border-hairline bg-hairline sm:grid-cols-3">
+        <div className="grid gap-px border border-hairline bg-hairline sm:grid-cols-2">
           {FEATURES.map(([title, body]) => (
             <div key={title} className="bg-ground p-5">
               <div className="meta mb-2">{title}</div>

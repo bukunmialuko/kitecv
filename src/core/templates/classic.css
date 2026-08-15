@@ -23,9 +23,9 @@
    * faux-bold by the browser.
    *
    *   800 heavy    name
-   *   700 bold     section titles, company names, skill labels
+   *   700 bold     section titles, company names, certification labels
    *   600 semibold job title under the name, dates
-   *   500 medium   role, location, tech chips
+   *   500 medium   role, location, tech chips, skill labels
    *   400 regular  bullets, contact details, summary
    */
   --fw-heavy: 800;
@@ -40,9 +40,13 @@
   --fs-section: 10.5pt;
   --fs-contact: 8.4pt;
   --fs-chip: 7.4pt;
+  --fs-skill-label: 7pt;
 
   --ink: #16181d;
   --ink-soft: #40454e;
+  /* One step lighter than --ink-soft: the skill label is a signpost for the
+   * column beside it, so it has to recede rather than compete with the values. */
+  --ink-muted: #8a8f98;
   --rule: #16181d;
   /* The chip reads as a soft filled capsule, not an outlined one: the border is
    * only a shade darker than the fill, so the edge blends rather than drawing a
@@ -59,6 +63,9 @@
   --gap-lg: 13pt;
 
   --bullet-indent: 11pt;
+  /* The skills label gutter. Wide enough that "Tools / Infra" stays on one line
+   * and narrow enough that "Frameworks / Libraries" wraps after the slash. */
+  --skill-label-col: 92pt;
 }
 
 *,
@@ -82,7 +89,9 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-base);
   font-weight: var(--fw-regular);
-  line-height: 1.42;
+  /* Loose enough that a two-line bullet reads as two lines rather than a block.
+   * 1.42 was set when bullets were expected to be one line each. */
+  line-height: 1.5;
   /* Inter's optical sizing and kerning are worth having on at body sizes. */
   font-kerning: normal;
   text-rendering: optimizeLegibility;
@@ -171,16 +180,18 @@ a[href]:hover {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5pt;
+  gap: 3.5pt;
 }
 
-/* The icons carry different amounts of internal padding inside their shared
- * 24x24 box, so the gap is set generously enough that the tightest of them (the
- * phone) still reads as separate from the text. */
+/* Each icon sits in a shared 24x24 box but its ink stops at a different inset —
+ * 5 units for the pin, 3 for the phone and LinkedIn, 2 for the mail and GitHub
+ * marks — so one gap value reads differently on every row. 3.5pt keeps the
+ * tightest of them (mail, GitHub) clear of the text while stopping the pin row
+ * from drifting apart, which is what the old 5pt did most visibly. */
 .contact-item {
   display: inline-flex;
   align-items: center;
-  gap: 5pt;
+  gap: 3.5pt;
   white-space: nowrap;
 }
 
@@ -218,13 +229,60 @@ a[href]:hover {
   margin: 0;
 }
 
-/* Skills wrap flat to the left content edge — no hanging indent under the bold
- * label, matching the reference layout. */
-.skill-line {
+/* Skills are a two-column row: a fixed label gutter on the left content edge and
+ * the values in a column of their own. Same left/right construction as
+ * .entry-row below, but a fixed basis rather than a flexible one — the gutter is
+ * the point, so it must not shift from row to row. */
+.skill-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-md);
+  /* A label stranded at a page foot with its values overleaf reads as a
+   * different section, so a row moves whole. `break-inside` is also the one
+   * primitive Paged.js implements, so the preview agrees with the PDF here.
+   * Rows are short enough that this never costs a page the way `break-inside`
+   * on a whole entry did. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.skill-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Uppercase comes from the stylesheet, not the markdown, so the author's own
+ * capitalisation survives in the source. */
+.skill-key {
+  flex: 0 0 var(--skill-label-col);
+  font-size: var(--fs-skill-label);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-muted);
+  /* Tight, so a two-line label reads as one block rather than two rows. */
+  line-height: 1.3;
+}
+
+.skill-values {
+  flex: 1 1 auto;
+  /* Without this a long unbroken token would push the column past the right
+   * edge instead of wrapping inside it. */
+  min-width: 0;
+}
+
+/* A skills line with no colon has no label to hang in the gutter, so it spans
+ * the full content width. */
+.skill-plain {
+  margin-bottom: var(--gap-md);
+}
+
+/* Certifications keep the run-in bold label. */
+.cert-line {
   margin-bottom: var(--gap-xs);
 }
 
-.skill-label {
+.cert-label {
   font-weight: var(--fw-bold);
 }
 
@@ -337,9 +395,12 @@ a[href]:hover {
   font-weight: var(--fw-semi);
 }
 
+/* Role and location are metadata hanging off the company/date row above, so they
+ * take the same muted grey as a skill label. They keep body size and sentence
+ * case though — the job title is content a reader looks for, not a signpost. */
 .entry-sub .left,
 .entry-sub .right {
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   font-weight: var(--fw-medium);
 }
 
@@ -351,9 +412,11 @@ a[href]:hover {
   list-style: none;
 }
 
+/* The step between bullets has to beat the step between lines *within* a bullet,
+ * or a multi-line list fuses into one grey block and the eye loses the entries. */
 .entry li {
   position: relative;
-  margin-bottom: var(--gap-xs);
+  margin-bottom: var(--gap-sm);
 }
 
 /*

@@ -116,7 +116,8 @@ Tech: Go, PostgreSQL, Redis, Kubernetes`,
     title: "Skills",
     body:
       "One line per line — no bullets, no nesting. Everything before the first " +
-      "colon renders bold as the category label.",
+      "colon becomes the category label, set small and uppercase in a fixed " +
+      "gutter down the left edge, with the values in their own column beside it.",
     markdown: `${HEADER}
 ## Skills
 Languages: Python, Go, TypeScript, SQL

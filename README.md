@@ -30,6 +30,9 @@ download is the file you previewed — down to the page breaks.
   produced it, so the file you archive is one you can edit again.
 - **A guide built in.** The Guide tab documents the whole format beside your
   editor. Every example in it is checked by the test suite.
+- **Two typesettings.** Switch template from the toolbar and the preview, the PDF
+  and the saved file all follow. Your markdown never changes — templates differ
+  by stylesheet and typeface only.
 
 ## Run it
 
@@ -83,20 +86,36 @@ Long entries flow across pages, splitting between bullets. To control that
 yourself: an extra blank line before an entry adds space, and a `---` line pushes
 whatever follows onto a new page.
 
+## Templates
+
+| | Typeface | Reads as |
+|---|---|---|
+| **Classic** | Inter throughout | Dense and neutral — the default |
+| **Plex** | Archivo for the name, IBM Plex Sans for text, IBM Plex Mono for dates, headers and labels | Editorial, wider-set |
+
+Adding one is a `.css` file plus a case in `core/templates/index.ts` — the
+renderer emits semantic classes and never changes. Every font is subset and
+embedded in the document itself, so an exported CV carries its own typeface and
+renders the same anywhere. Only the default template ships in the main bundle;
+the rest load when you pick them.
+
 ## Layout
 
 ```
 src/core/          parse · report · render — no React, no DOM
+src/core/templates/  one stylesheet per template
 src/components/    the React shell
 api/pdf.ts         headless Chrome: HTML in, PDF out
 ```
 
 `core/` is deliberately framework-free so it can be lifted into a VS Code
-extension later. `assets.ts` is the only file that knows about the bundler.
+extension later. `assets.ts` and `assets.plex.ts` are the only files that know
+about the bundler.
 
 ## Credits
 
-Typeset in [Inter](https://rsms.me/inter/) (SIL OFL, bundled). The renderer began
-life as a Python tool in
+Typeset in [Inter](https://rsms.me/inter/), [Archivo](https://omnibus-type.com/fonts/archivo/)
+and [IBM Plex](https://www.ibm.com/plex/) — all SIL OFL, all bundled. The
+renderer began life as a Python tool in
 [skill-bridge](https://github.com/bukunmialuko/skill-bridge); the test suite pins
 this port to that verified output.
