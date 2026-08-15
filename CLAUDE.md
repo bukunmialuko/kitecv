@@ -85,9 +85,11 @@ These are load-bearing. Breaking one silently degrades the output.
 - **Guide snippets are executable documentation.** `src/guide/topics.ts` is
   parsed by `guide.test.ts`, which asserts each snippet still produces what its
   prose claims. Change the format and the docs fail with it, by design.
-- **Preview furniture stays out of `renderDocument()`.** The dot grid, sheet
+- **Preview furniture stays out of `renderDocument()`.** The panel ground, sheet
   borders and page numbers are injected into the iframe only — in the document
-  they would print.
+  they would print. That ground is deliberately flat: the iframe is
+  transform-scaled to fit the pane, so any background pattern scales with it and
+  no longer lines up with the shell's own.
 - The logic was ported from `skill-bridge/tool-01-cv-renderer`, and
   `render.test.ts` pins it to that verified output via
   `__fixtures__/sample.body.html`. Regenerate the fixture only when a rendering

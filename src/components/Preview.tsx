@@ -15,12 +15,17 @@ const PAGE_WIDTH_PX = 794;
  * the mono page numbers. Appended *after* the CV stylesheet, inside the iframe.
  *
  * This must never reach `renderDocument()` — it would print.
+ *
+ * The ground behind the sheets is flat panel grey, not the shell's dot grid.
+ * The grid cannot survive here: the iframe is transform-scaled to fit the pane,
+ * which scales its background with it, so a 24px grid inside landed at ~21px
+ * against the true 24px outside — and the mismatch read as noise in the gap
+ * between pages, which is the one place it is actually visible.
  */
 const PREVIEW_CSS = `
   html { background: transparent; }
   body {
-    background-image: radial-gradient(var(--kite-dot) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background: var(--kite-ground);
     margin: 0; padding: 20px 0 28px;
   }
   .pagedjs_page {
@@ -104,8 +109,11 @@ export default function Preview({ html, dark, onPageCount }: Props) {
       <\/script>
       <script src="${PAGED_POLYFILL_URL}"><\/script>
     `;
+    // --kite-ground mirrors the shell's --color-panel. The CV's own stylesheet
+    // paints body white, so without this the gaps between sheets stayed white in
+    // dark mode and read as a lit band across the pane.
     const themed = `<style>:root{--kite-hairline:${dark ? "#2a2a2a" : "#e5e5e5"};
-      --kite-dot:${dark ? "#1e1e1e" : "#e8e8e8"};--kite-muted:${dark ? "#7a7a7a" : "#8a8a8a"};}</style>`;
+      --kite-ground:${dark ? "#111111" : "#fafafa"};--kite-muted:${dark ? "#7a7a7a" : "#8a8a8a"};}</style>`;
 
     const doc = frame.contentDocument;
     if (!doc) return;
@@ -117,7 +125,7 @@ export default function Preview({ html, dark, onPageCount }: Props) {
   }, [html, dark, onPageCount]);
 
   return (
-    <div ref={wrapRef} className="h-full overflow-auto dotgrid">
+    <div ref={wrapRef} className="h-full overflow-auto bg-panel">
       <div
         style={{ width: PAGE_WIDTH_PX * scale, height: height * scale }}
         className="mx-auto"
