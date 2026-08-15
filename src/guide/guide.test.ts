@@ -57,6 +57,18 @@ describe("snippets prove what their prose claims", () => {
     expect(data.experience[0].url).toBe("https://northwind.example");
   });
 
+  // The `·` form is the one the prose claims is interchangeable, so assert the
+  // rendered output: the name is the anchor, and the address appears once —
+  // inside the href, never printed beside the date.
+  it("links: a project's bare address lands on the name, not beside the date", () => {
+    const { data } = byId("links");
+    expect(data.projects[0].link).toBe("ledgerly.example");
+    const html = renderBody(data);
+    expect(html).toContain('<a href="https://ledgerly.example"');
+    expect(html).toMatch(/<a href="https:\/\/ledgerly\.example"[^>]*>Ledgerly<\/a>/);
+    expect(html).not.toMatch(/>ledgerly\.example</);
+  });
+
   it("chips: the Tech line becomes technologies", () => {
     const { data } = byId("chips");
     expect(data.experience[0].technologies).toEqual(["Go", "PostgreSQL", "Redis", "Kubernetes"]);

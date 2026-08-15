@@ -41,6 +41,8 @@
   --fs-contact: 8.4pt;
   --fs-chip: 7.4pt;
   --fs-skill-label: 7pt;
+  /* The role and location line, a step under body text. */
+  --fs-role: 8.9pt;
 
   --ink: #16181d;
   --ink-soft: #40454e;
@@ -400,6 +402,7 @@ a[href]:hover {
  * case though — the job title is content a reader looks for, not a signpost. */
 .entry-sub .left,
 .entry-sub .right {
+  font-size: var(--fs-role);
   color: var(--ink-muted);
   font-weight: var(--fw-medium);
 }

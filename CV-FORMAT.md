@@ -66,7 +66,7 @@ What each column means per section:
 | Section | Bold row left | Bold row right | Sub row left | Sub row right |
 |---|---|---|---|---|
 | Experience | Company | Date range | Job title | Location |
-| Projects | Project name | Period `·` link | Description | — |
+| Projects | Project name (carries the link) | Period | Description | — |
 | Education | Institution | Year or range | Degree | — |
 
 ### Links
@@ -80,6 +80,17 @@ itself clickable**:
 
 The link is optional — `### Northwind Systems | March 2023 – Present` renders as
 plain bold text. Links stay clickable in the exported PDF.
+
+A project may instead put its address after a `·`, which is often easier to
+type:
+
+```markdown
+### Ledgerly | 2023 – Present · ledgerly.example
+```
+
+Either way the **name** becomes the link and the address is not printed
+separately — so the date column stays a clean date column. Write both and the
+markdown link wins.
 
 ### Dates
 

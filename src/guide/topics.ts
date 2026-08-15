@@ -94,8 +94,15 @@ Senior Software Engineer | Remote
 ## Experience
 ### [Northwind Systems](https://northwind.example) | March 2023 – Present
 Senior Software Engineer | Remote
-- Shipped the public API, documented at [the portal](https://northwind.example/docs).`,
-    note: "Leave the link out and the name renders as plain bold text.",
+- Shipped the public API, documented at [the portal](https://northwind.example/docs).
+
+## Projects
+### Ledgerly | 2023 – Present · ledgerly.example
+- Self-hosted expense tracker used daily by 200+ people.`,
+    note:
+      "Leave the link out and the name renders as plain bold text. A project " +
+      "can put its address after a `·` instead, which is easier to type — the " +
+      "name still carries it, and the address is never printed twice.",
   },
   {
     id: "chips",
