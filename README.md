@@ -119,3 +119,7 @@ and [IBM Plex](https://www.ibm.com/plex/) — all SIL OFL, all bundled. The
 renderer began life as a Python tool in
 [skill-bridge](https://github.com/bukunmialuko/skill-bridge); the test suite pins
 this port to that verified output.
+
+## License
+
+MIT © 2026 Oluwabukunmi Aluko — see [LICENSE](LICENSE).
