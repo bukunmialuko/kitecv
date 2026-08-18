@@ -7,7 +7,8 @@ Guidance for Claude Code when working in this repository.
 **Kite** — a markdown CV editor. Markdown in, a real PDF out: selectable text,
 live links, embedded fonts, true pagination. Deployed on Vercel.
 
-- `src/core/` — parse, report, render. **Framework-free**: no React, no DOM.
+- `src/core/` — parse, format, report, render. **Framework-free**: no React,
+  no DOM.
 - `src/components/` — the React shell.
 - `api/pdf.ts` — serverless headless Chrome, HTML in, PDF out.
 
@@ -70,6 +71,15 @@ These are load-bearing. Breaking one silently degrades the output.
   `printBackground: true` in `page.pdf()`.** Measured: either alone is enough,
   and only dropping both loses the chip fills. Both are kept, so a template that
   forgets the CSS side still exports correctly.
+- **Formatting is parse-preserving and idempotent.** `formatMarkdown` rewrites
+  the author's source, and the editor runs it unprompted two seconds after the
+  typing stops, so a rule that loses something loses it on every CV. Reparsing
+  formatted markdown must give back the same `Cv` — the single exception is the
+  date dash, and `format.test.ts` states it through `formatColumn` itself rather
+  than restating it. Blank-line counts and `---` are meaning, not whitespace:
+  the formatter re-emits them, and prose sections are printed verbatim so it
+  does not touch them at all. It reads its grammar from `parse.ts`'s exports;
+  a second definition of what a bullet looks like would drift.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
 - **The CV document stays black-on-white in both themes.** It is a printed page.

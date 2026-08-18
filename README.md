@@ -23,6 +23,12 @@ download is the file you previewed — down to the page breaks.
   breaks in the preview is where it breaks in the PDF.
 - **Analysis.** Employment gaps, reversed dates, entries out of order, missing
   sections — checked as you type.
+- **Formatting.** Press Format and the source is rewritten in canonical shape:
+  spaced pipes, `- ` bullets, en-dashed date ranges, one blank line where one
+  belongs. Leave Auto on and it runs itself two seconds after you stop typing.
+  It cannot change what your CV says — the blank lines that mean a spacing step
+  and the `---` that means a page break are counted, not collapsed, and prose is
+  left exactly as you typed it.
 - **No account.** Editing, preview and analysis run in your browser. The CV is
   sent to the server only when you press Download, rendered in memory, and never
   stored.
@@ -102,7 +108,7 @@ the rest load when you pick them.
 ## Layout
 
 ```
-src/core/          parse · report · render — no React, no DOM
+src/core/          parse · format · report · render — no React, no DOM
 src/core/templates/  one stylesheet per template
 src/components/    the React shell
 api/pdf.ts         headless Chrome: HTML in, PDF out

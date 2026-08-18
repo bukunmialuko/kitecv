@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Analysis from "./components/Analysis";
-import Editor from "./components/Editor";
+import Editor, { type EditorHandle } from "./components/Editor";
 import Landing from "./components/Landing";
 import Guide from "./components/Guide";
 import Preview from "./components/Preview";
@@ -15,6 +15,7 @@ import { DEFAULT_TEMPLATE_ID, defaultTemplate, loadTemplate } from "./core/templ
 const KEY_MD = "kite:markdown";
 const KEY_TEMPLATE = "kite:template";
 const KEY_THEME = "kite:theme";
+const KEY_AUTOFORMAT = "kite:autoformat";
 
 /** Pagination costs ~150–300ms, so only it is debounced. Analysis is instant. */
 const REPAGINATE_MS = 250;
@@ -36,9 +37,16 @@ export default function App() {
     () => localStorage.getItem(KEY_TEMPLATE) ?? DEFAULT_TEMPLATE_ID,
   );
   const [dark, setDark] = useState(() => localStorage.getItem(KEY_THEME) === "dark");
+  // On unless it has been turned off: the formatter is parse-preserving, so the
+  // worst it can do while you type is move your own whitespace.
+  const [autoFormat, setAutoFormat] = useState(
+    () => localStorage.getItem(KEY_AUTOFORMAT) !== "off",
+  );
   const [tab, setTab] = useState<"preview" | "analysis" | "guide">("preview");
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [pageCount, setPageCount] = useState(0);
+  // Formatting belongs to the editor, which owns the caret it has to put back.
+  const editorRef = useRef<EditorHandle>(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -48,6 +56,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(KEY_TEMPLATE, templateId);
   }, [templateId]);
+
+  useEffect(() => {
+    localStorage.setItem(KEY_AUTOFORMAT, autoFormat ? "on" : "off");
+  }, [autoFormat]);
 
   // Every template but the default is a separate chunk, so switching is async.
   // The previously loaded template stays on screen until the new one arrives —
@@ -161,6 +173,9 @@ export default function App() {
         dark={dark}
         onToggleTheme={() => setDark((d) => !d)}
         onUpload={load}
+        onFormat={() => editorRef.current?.format()}
+        autoFormat={autoFormat}
+        onToggleAutoFormat={() => setAutoFormat((on) => !on)}
         onDownloadMd={() =>
           download(new Blob([markdown], { type: "text/markdown" }), "cv.md")
         }
@@ -174,7 +189,7 @@ export default function App() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
         <div className="min-h-0 border-hairline lg:border-r">
-          <Editor value={markdown} onChange={setMarkdown} />
+          <Editor ref={editorRef} value={markdown} onChange={setMarkdown} auto={autoFormat} />
         </div>
 
         <div className="flex min-h-0 flex-col border-t border-hairline lg:border-t-0">

@@ -9,6 +9,9 @@ interface Props {
   dark: boolean;
   onToggleTheme: () => void;
   onUpload: (text: string) => void;
+  onFormat: () => void;
+  autoFormat: boolean;
+  onToggleAutoFormat: () => void;
   onDownloadMd: () => void;
   onDownloadPdf: () => void;
   onHome: () => void;
@@ -18,8 +21,9 @@ interface Props {
 const BTN = "border border-hairline px-3 py-1.5 text-xs hover:border-ink disabled:opacity-50";
 
 export default function Toolbar({
-  templateId, onTemplate, dark, onToggleTheme,
-  onUpload, onDownloadMd, onDownloadPdf, onHome, pdf,
+  templateId, onTemplate, dark, onToggleTheme, onUpload,
+  onFormat, autoFormat, onToggleAutoFormat,
+  onDownloadMd, onDownloadPdf, onHome, pdf,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const working = pdf.status === "working";
@@ -57,6 +61,23 @@ export default function Toolbar({
             </option>
           ))}
         </select>
+
+        <button className={BTN} onClick={onFormat} title="Tidy the markdown (⇧⌥F)">
+          ⇥ Format
+        </button>
+
+        <button
+          className={`${BTN} ${autoFormat ? "border-ink" : "text-muted"}`}
+          onClick={onToggleAutoFormat}
+          aria-pressed={autoFormat}
+          title={
+            autoFormat
+              ? "Formatting runs once you stop typing"
+              : "Formatting only runs when you ask for it"
+          }
+        >
+          Auto {autoFormat ? "on" : "off"}
+        </button>
 
         <button className={BTN} onClick={onDownloadMd}>
           ↓ .md

@@ -209,6 +209,31 @@ Inside bullets, the summary and descriptions: `**bold**`, `*italic*`,
 `` `code` ``, `[text](url)`, and bare URLs (auto-linked). Everything is HTML
 escaped first, so `&`, `<` and `>` are safe to type.
 
+## Canonical form
+
+`formatMarkdown` in `src/core/format.ts` rewrites a document into the shape this
+file describes — the shape [`src/core/sample.md`](src/core/sample.md) is already
+in. It is the **Format** button in the app, and it runs on its own two seconds
+after you stop typing unless Auto is switched off.
+
+It is a formatter, not a fixer. Reparsing formatted markdown gives back the same
+CV, which is what makes it safe to run unprompted. So:
+
+- Spacing and page breaks are **counted, not collapsed**. Extra blank lines
+  before an entry survive up to the cap of three; a `---` is re-emitted on the
+  entry or section it belonged to.
+- Summary, Skills and Certifications are **left exactly as typed**. Every
+  character of those lines is printed, so none of them is the formatter's to
+  reflow.
+- What it does normalise is the grammar around your words: ` | ` around the
+  column split, `- ` bullets, two-space continuations, `[text](url)` titles,
+  `Tech: a, b, c` (keeping whichever of `Tech`, `Technologies` or `Stack` you
+  wrote), one blank line above a `##`, and no trailing whitespace.
+- One mark reaches the page: a date range comes back as `2012 – 2016`, the en
+  dash Experience already prints and Education and Projects did not. Only a
+  range whose two sides are both dates is touched, so `Remote - Contract` is
+  left alone.
+
 ## Report
 
 `buildReport` in `src/core/report.ts` checks dates and completeness — employment

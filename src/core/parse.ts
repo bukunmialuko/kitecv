@@ -46,11 +46,23 @@ for (const [key, names] of Object.entries(SECTION_ALIASES)) {
   for (const name of names) ALIAS_TO_KEY.set(name, key as SectionKey);
 }
 
-const ENTRY_SECTIONS: SectionKey[] = ["experience", "projects", "education"];
+/** Resolve a `##` heading to its section key, or null if it is not one we know. */
+export function sectionKeyFor(heading: string): SectionKey | null {
+  return ALIAS_TO_KEY.get(heading.trim().toLowerCase()) ?? null;
+}
+
+/*
+ * The grammar below is exported for `format.ts`, which has to recognise exactly
+ * what this file recognises — a formatter working from its own idea of the
+ * format would eventually reshape a line into something the parser reads
+ * differently. One definition, two readers.
+ */
+
+export const ENTRY_SECTIONS: SectionKey[] = ["experience", "projects", "education"];
 
 const MD_LINK_RE = /^\[([^\]]+)\]\(([^)]+)\)\s*$/;
-const TECH_RE = /^(?:tech|technologies|stack)\s*:\s*(.+)$/i;
-const BULLET_RE = /^[-*]\s+(.+)$/;
+export const TECH_RE = /^(?:tech|technologies|stack)\s*:\s*(.+)$/i;
+export const BULLET_RE = /^[-*]\s+(.+)$/;
 const PHONE_RE = /^[+(]?\d[\d\s()\-.]{5,}$/;
 const DOMAIN_RE = /^(?:https?:\/\/)?[\w-]+(?:\.[\w-]+)+(?:\/\S*)?$/i;
 
@@ -64,14 +76,14 @@ const RANGE_TIGHT_RE = /^(\d{4})\s*[–—-]\s*(.+)$/;
 const CONTACT_SPLIT_RE = /\s*[|·•]\s*/;
 
 /** A `---` line on its own forces whatever follows onto a new page. */
-const PAGE_BREAK_RE = /^-{3,}$/;
+export const PAGE_BREAK_RE = /^-{3,}$/;
 
 /**
  * One blank line between entries is the norm and means nothing; each further
  * blank adds a step of space. Capped so a stray run of newlines cannot blow a
  * page apart.
  */
-const MAX_SPACING = 3;
+export const MAX_SPACING = 3;
 
 function finding(
   type: string,
@@ -82,6 +94,9 @@ function finding(
   return { category: "structure", type, severity: "warning", section, index, message };
 }
 
+/** The leading `--- … ---` block, captured whole so `format.ts` can re-emit it. */
+export const FRONT_MATTER_RE = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/;
+
 /**
  * Split a leading `--- key: value ---` block off the document.
  *
@@ -90,7 +105,7 @@ function finding(
  */
 export function parseFrontMatter(text: string): { options: CvOptions; body: string } {
   const options: CvOptions = {};
-  const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/.exec(text);
+  const match = FRONT_MATTER_RE.exec(text);
   if (!match) return { options, body: text };
 
   for (const raw of match[1].split(/\r?\n/)) {
@@ -444,7 +459,7 @@ export function parseCv(text: string): ParseResult {
 
     if (stripped.startsWith("## ")) {
       const heading = stripped.slice(3).trim();
-      const key = ALIAS_TO_KEY.get(heading.toLowerCase());
+      const key = sectionKeyFor(heading);
       if (!key) {
         findings.push(finding("unknown_section", `Ignored unrecognised section heading: ${heading}`));
         currentKey = null;
