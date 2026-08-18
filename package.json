@@ -1,7 +1,7 @@
 {
   "name": "kitecv",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Kite — write your CV in Markdown, download a real PDF",
   "author": "Oluwabukunmi Aluko",
   "license": "MIT",
