@@ -82,7 +82,19 @@ These are load-bearing. Breaking one silently degrades the output.
   a second definition of what a bullet looks like would drift.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
-- **The CV document stays black-on-white in both themes.** It is a printed page.
+- **The CV's colours follow its paper, never the app theme.** White paper or
+  black (`#222222`, white ink) is a document setting, like the template; the
+  shell's light/dark toggle never reaches the iframe. Paper swaps colour tokens
+  only — never a size, weight or gap — so a CV paginates identically on both,
+  and `render.test.ts` pins the body as byte-identical across papers.
+- **Black paper needs `@page { background }`.** Measured: a root background
+  alone stops at the page margin and leaves a white frame round every PDF
+  sheet. `pageCss()` emits it, because `@page` cannot read a custom property;
+  templates own only the ink, under `:root[data-paper="dark"]`.
+- **The QR code has to scan.** `qr.test.ts` replays the drawn SVG path into
+  pixels and decodes it with jsQR. On black paper the code stays dark modules
+  on a white tile — inverted codes are not read by every phone camera. Its box
+  is the same size on both papers, so toggling paper moves nothing.
 - **Entries are allowed to span pages.** `break-inside: avoid` on `.entry` was
   removed: it pushed tall roles whole and left dead space behind them. The narrow
   rules that replaced it (header `break-after: avoid`, `li break-inside: avoid`,
@@ -123,3 +135,7 @@ PDF-out.
 npm test          # vitest — core suites, the fixture test, and the guide check
 npm run build     # tsc --noEmit && vite build; must pass before proposing a commit
 ```
+
+`npm run dev` also serves `/api/pdf` (a dev-only plugin in `vite.config.ts`
+that runs the real handler against the installed Chrome), so Download works
+locally without `vercel dev`.

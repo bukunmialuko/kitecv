@@ -126,6 +126,56 @@ describe("renderDocument is self-contained", () => {
   });
 });
 
+describe("paper", () => {
+  const light = renderDocument(cv(sampleMarkdown));
+  const dark = renderDocument(cv(sampleMarkdown), { paper: "dark" });
+
+  it("prints on white by default, with no page background to paint", () => {
+    expect(light).toContain('<html lang="en">');
+    expect(light).toContain("--paper: #ffffff;");
+    expect(light).not.toMatch(/@page \{[^}]*background/);
+  });
+
+  // A root background alone stops at the page margin, leaving a white frame
+  // round every sheet of the PDF. Only `@page` reaches the edge.
+  it("paints black paper edge to edge through @page", () => {
+    expect(dark).toContain('<html lang="en" data-paper="dark">');
+    expect(dark).toContain("--paper: #222222;");
+    expect(dark).toMatch(/@page \{[^}]*background: #222222;/);
+  });
+
+  // Colours only: if paper changed a single box, line breaks would move and the
+  // preview of one paper would lie about the PDF of the other.
+  it("changes nothing in the body", () => {
+    const body = (html: string) => html.slice(html.indexOf("<body>"));
+    expect(body(dark)).toBe(body(light));
+  });
+});
+
+describe("qr", () => {
+  const url = "https://linkedin.com/in/jordanavery";
+
+  it("prints no code unless one is asked for", () => {
+    expect(renderBody(cv(sampleMarkdown))).not.toContain('class="qr"');
+  });
+
+  it("puts a linked code after the contact block, inside the header", () => {
+    const html = renderBody(cv(sampleMarkdown), { qr: url });
+    const header = html.slice(0, html.indexOf("</header>"));
+    expect(header).toContain(`<a class="qr" href="${url}"`);
+    expect(header.indexOf('class="contact"')).toBeLessThan(header.indexOf('class="qr"'));
+    expect(header).toContain('<svg class="qr-code"');
+  });
+
+  it("escapes the URL it links to", () => {
+    expect(renderBody(cv(sampleMarkdown), { qr: 'https://x.example/"><b>' })).not.toContain('"><b>');
+  });
+
+  it("treats a blank URL as no code", () => {
+    expect(renderBody(cv(sampleMarkdown), { qr: "  " })).not.toContain('class="qr"');
+  });
+});
+
 /**
  * Fonts hang off the template rather than the document, and this is the test
  * that keeps them there. Each family costs 50-150KB once base64-inlined, so the

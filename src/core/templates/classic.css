@@ -3,9 +3,11 @@
  * Two rules run through everything here:
  *   1. One content grid. Section rules, headings, entry rows, bullets, chips and
  *      skills all share a single left edge and a single right edge.
- *   2. The document is always black-on-white. It is a printed page, so it does
- *      not follow the repo's light/dark theme convention — only the preview
- *      shell around it is themed.
+ *   2. The document's colours come from its paper, never from the app theme.
+ *      White paper by default; `data-paper="dark"` on the root swaps the ink
+ *      tokens below for black paper. The sheet colour itself (`--paper`, and
+ *      the `@page` background that carries it into the margins) is emitted by
+ *      `pageCss()`, because `@page` cannot read a custom property.
  *
  * `--page-size`, `--page-margin` and `--content-width` are emitted by html.py
  * ahead of this file, because `@page { size: … }` cannot read a custom property.
@@ -56,6 +58,16 @@
   --chip-bg: #f4f5f7;
   --chip-border: #e7e9ed;
   --chip-ink: #3b4048;
+  /* The middot between contact tokens on one row. */
+  --sep: #9aa0aa;
+
+  /* The QR code. A fixed box matched to a four-row contact block, so switching
+   * paper never moves a line: on white paper the padding is quiet zone, on
+   * black it becomes the white tile the code needs to scan. */
+  --qr-size: 54pt;
+  --qr-pad: 3.5pt;
+  --qr-ground: transparent;
+  --qr-ink: var(--ink);
 
   /* Vertical rhythm comes from these four values rather than per-rule numbers,
    * so spacing stays even across sections. */
@@ -70,6 +82,27 @@
   --skill-label-col: 92pt;
 }
 
+/*
+ * Black paper (#222222). Only colours change here — never a size, weight or
+ * spacing — so a CV paginates identically on either paper.
+ *
+ * The QR code keeps dark modules on a white tile rather than inverting: not
+ * every phone camera reads a light-on-dark code, and the code is the one thing
+ * on the page that has to work for a machine.
+ */
+:root[data-paper="dark"] {
+  --ink: #ffffff;
+  --ink-soft: #d4d4d4;
+  --ink-muted: #a0a0a0;
+  --rule: #ffffff;
+  --chip-bg: #2e2e2e;
+  --chip-border: #3c3c3c;
+  --chip-ink: #e8e8e8;
+  --sep: #6e6e6e;
+  --qr-ground: #ffffff;
+  --qr-ink: #222222;
+}
+
 *,
 *::before,
 *::after {
@@ -81,12 +114,12 @@
 }
 
 html {
-  background: #fff;
+  background: var(--paper, #fff);
 }
 
 body {
   margin: 0;
-  background: #fff;
+  background: var(--paper, #fff);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--fs-base);
@@ -198,13 +231,42 @@ a[href]:hover {
 }
 
 .contact-sep {
-  color: #9aa0aa;
+  color: var(--sep);
 }
 
 .icon {
   width: 8.4pt;
   height: 8.4pt;
   flex: none;
+  fill: currentColor;
+}
+
+/* With a code in the header the contact block stops being the last child, and
+ * `space-between` would float it to the middle. The auto margin keeps it packed
+ * against the code instead; without one it changes nothing. */
+.header > .contact {
+  margin-left: auto;
+}
+
+/* The code is part of the contact group, so it sits closer to the contacts
+ * than they sit to the name: the header's gap minus the difference. Padding
+ * plus this margin still leaves a quiet zone of six modules on white paper,
+ * where four is the spec. */
+.qr {
+  flex: none;
+  display: block;
+  margin-left: calc(var(--gap-md) - var(--gap-lg));
+  width: var(--qr-size);
+  height: var(--qr-size);
+  padding: var(--qr-pad);
+  background: var(--qr-ground);
+  color: var(--qr-ink);
+}
+
+.qr-code {
+  display: block;
+  width: 100%;
+  height: 100%;
   fill: currentColor;
 }
 

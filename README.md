@@ -36,9 +36,16 @@ download is the file you previewed — down to the page breaks.
   produced it, so the file you archive is one you can edit again.
 - **A guide built in.** The Guide tab documents the whole format beside your
   editor. Every example in it is checked by the test suite.
-- **Two typesettings.** Switch template from the toolbar and the preview, the PDF
-  and the saved file all follow. Your markdown never changes — templates differ
-  by stylesheet and typeface only.
+- **Two typesettings.** Switch template above the preview and the preview, the
+  PDF and the saved file all follow. Your markdown never changes — templates
+  differ by stylesheet and typeface only.
+- **White or black paper.** Black is `#222222` with white ink, painted to the
+  edge of every PDF page rather than stopping at the margin. Paper changes
+  colour only, so a CV breaks across pages identically on either.
+- **Scan to open.** A QR code of the best link in your header — your site, then
+  LinkedIn, then GitHub, or whichever you pick — printed beside your contacts.
+  Clickable in the PDF; on black paper it sits on a white tile so every phone
+  camera reads it. The test suite decodes it to prove it scans.
 
 ## Run it
 
@@ -49,9 +56,8 @@ npm test         # vitest
 npm run build
 ```
 
-PDF export needs the serverless function, so run `vercel dev` instead of
-`npm run dev` if you want to exercise Download locally. Everything else works
-without it.
+`npm run dev` serves the PDF function too, driving your installed Chrome, so
+Download works locally without `vercel dev`.
 
 Deployed on Vercel; the PDF function runs headless Chromium, so the first request
 after an idle period takes a few seconds to cold-start.

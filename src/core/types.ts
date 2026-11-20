@@ -156,10 +156,20 @@ export interface Template {
   fontCss: string;
 }
 
+/**
+ * The sheet the CV is printed on. Independent of the app's light/dark theme: the
+ * shell follows the person's eyes, the paper follows what they chose to send.
+ */
+export type Paper = "light" | "dark";
+
 export interface RenderOptions {
   template?: Template;
   showProjects?: boolean;
   showChips?: boolean;
   page?: "a4" | "letter";
   fontSize?: number;
+  /** White (the default) or black `#222222` with white ink, edge to edge. */
+  paper?: Paper;
+  /** A URL to print as a scannable QR code beside the contact block. */
+  qr?: string;
 }
