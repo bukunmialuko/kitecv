@@ -95,6 +95,10 @@ These are load-bearing. Breaking one silently degrades the output.
   point size — so switching template never makes the CV look smaller. Bullet markers are centred on the
   x-height by *measurement in Chrome*, not derived from font metrics (which put
   Plex 0.8pt off); re-measure after changing a template's leading or body size.
+- **`***text***` is a highlight, not bold-italic.** It renders as `<mark>`,
+  which every template must style (`--accent`, plus `--accent-glow` on black
+  paper) — an unstyled `<mark>` gets the browser's yellow background. Colour,
+  weight and glow only, so a highlight never moves a line.
 - **The CV's colours follow its paper, never the app theme.** White paper or
   black (`#222222`, white ink) is a document setting, like the template; the
   shell's light/dark toggle never reaches the iframe. Paper swaps colour tokens

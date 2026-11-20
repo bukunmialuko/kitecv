@@ -64,6 +64,8 @@
   --chip-ink: #3b4048;
   /* The middot between contact tokens on one row. */
   --sep: #9aa0aa;
+  /* `***text***` highlights. */
+  --accent: #15803d;
 
   /*
    * Vertical rhythm: the scale every Kite template shares, one step per level
@@ -100,6 +102,8 @@
   --chip-border: #3c3c3c;
   --chip-ink: #e8e8e8;
   --sep: #6e6e6e;
+  --accent: #4ade80;
+  --accent-glow: rgba(74, 222, 128, 0.45);
 }
 
 *,
@@ -529,4 +533,23 @@ code {
   padding: 0.5pt 2.5pt;
   background: var(--chip-bg);
   border-radius: 2pt;
+}
+
+/* -------------------------------------------------------------- highlight --- */
+
+/*
+ * `***text***` — the one colour a CV carries, for the numbers that prove the
+ * work. A deep green on white (5.0:1); on black paper a brighter green (9.1:1)
+ * with a soft glow, the neon that only reads as light against a dark page.
+ * Colour, weight and glow only — never a size or spacing — so highlighting a
+ * number cannot move a line.
+ */
+mark {
+  background: none;
+  color: var(--accent);
+  font-weight: var(--fw-semi);
+}
+
+:root[data-paper="dark"] mark {
+  text-shadow: 0 0 0.45em var(--accent-glow);
 }

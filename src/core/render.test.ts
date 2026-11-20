@@ -44,6 +44,15 @@ describe("inline", () => {
     expect(inline("`c`")).toBe("<code>c</code>");
   });
 
+  it("renders ***text*** as a highlight, leaving ** and * as they were", () => {
+    expect(inline("cut latency by ***60%***")).toBe("cut latency by <mark>60%</mark>");
+    expect(inline("***60%*** and **40%** and *x*")).toBe("<mark>60%</mark> and <strong>40%</strong> and <em>x</em>");
+  });
+
+  it("keeps a highlight inside a code span literal", () => {
+    expect(inline("`***60%***`")).toBe("<code>***60%***</code>");
+  });
+
   it("renders markdown links and bare URLs", () => {
     expect(inline("[docs](https://x.example)")).toContain('href="https://x.example"');
     expect(inline("see https://x.example/y")).toContain('<a href="https://x.example/y"');

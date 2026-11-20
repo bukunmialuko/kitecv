@@ -205,7 +205,10 @@ chips — is set in the app, so one file exports every way without an edit. A
 ## Inline formatting
 
 Inside bullets, the summary and descriptions: `**bold**`, `*italic*`,
-`` `code` ``, `[text](url)`, and bare URLs (auto-linked). Everything is HTML
+`***highlight***`, `` `code` ``, `[text](url)`, and bare URLs (auto-linked).
+A highlight sets its text in the template's accent green — deep on white
+paper, brighter with a soft glow on black — for the numbers you want read
+first. It is not bold-italic: no template embeds an italic face. Everything is HTML
 escaped first, so `&`, `<` and `>` are safe to type.
 
 ## Canonical form

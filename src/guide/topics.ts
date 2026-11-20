@@ -221,13 +221,16 @@ Tech: Go, Redis`,
   {
     id: "inline",
     title: "Inline formatting",
-    body: "Inside bullets and the summary you can use bold, italic, code and links.",
+    body:
+      "Inside bullets and the summary you can use bold, italic, code and links. " +
+      "Three asterisks highlight a number in the template's accent green — the " +
+      "result you want read first.",
     markdown: `${HEADER}
 ## Experience
 ### Northwind Systems | 2023 – Present
 Engineer | Remote
 - Rebuilt the scheduling screen in **React**, replacing a table that reflowed.
-- Built the metrics API in \`Go\`, serving 40M requests a month.
+- Built the metrics API in \`Go\`, serving ***40M*** requests a month.
 - Documented at [the developer portal](https://northwind.example/docs).`,
   },
   {
