@@ -47,7 +47,8 @@
   --fs-contact: 8.4pt;
   --fs-section: 8.4pt;
   --fs-skill-label: 7.8pt;
-  --fs-chip: 7.4pt;
+  /* 7.6pt: the floor for any text on the page. */
+  --fs-chip: 7.6pt;
 
   /* Body leading. 1.5 x 10pt = a 15pt line, the unit the spacing scale below
    * is measured against. The handoff's 1.62 sat above the 1.2-1.45 range a

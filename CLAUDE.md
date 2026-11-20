@@ -85,9 +85,14 @@ These are load-bearing. Breaking one silently degrades the output.
   a second definition of what a bullet looks like would drift.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
-- **Plex and Modern share one spacing scale** — 2/4/8/14/24pt, one step per
+- **Every template shares one spacing scale** — 2/4/8/14/24pt, one step per
   level (contact rows / bullets / rule-to-content / entries / sections), so a
-  new job always reads as a new group. Bullet markers are centred on the
+  new job always reads as a new group. Templates differ in typography, never in
+  rhythm.
+- **Readability floors, on both papers:** every text role at least 4.5:1
+  against its ground (small text below that is deciphered, not read), nothing
+  under 7.6pt, and body text matched across templates by x-height (5.2pt), not
+  point size — so switching template never makes the CV look smaller. Bullet markers are centred on the
   x-height by *measurement in Chrome*, not derived from font metrics (which put
   Plex 0.8pt off); re-measure after changing a template's leading or body size.
 - **The CV's colours follow its paper, never the app theme.** White paper or

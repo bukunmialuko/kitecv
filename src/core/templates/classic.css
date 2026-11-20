@@ -41,16 +41,20 @@
   --fs-title: 10.5pt;
   --fs-section: 10.5pt;
   --fs-contact: 8.4pt;
-  --fs-chip: 7.4pt;
-  --fs-skill-label: 7pt;
+  /* 7.6pt is the floor for any text on the page: below it a print x-height
+   * drops under 4pt and the word stops reading at a glance. */
+  --fs-chip: 7.6pt;
+  --fs-skill-label: 7.6pt;
   /* The role and location line, a step under body text. */
   --fs-role: 8.9pt;
 
   --ink: #16181d;
   --ink-soft: #40454e;
-  /* One step lighter than --ink-soft: the skill label is a signpost for the
-   * column beside it, so it has to recede rather than compete with the values. */
-  --ink-muted: #8a8f98;
+  /* One step lighter than --ink-soft: the skill label, role and location are
+   * signposts, so they recede rather than compete. 5:1 against white — the old
+   * #8a8f98 was 3.2:1, under the 4.5:1 that small text needs to be read rather
+   * than deciphered. */
+  --ink-muted: #6b7079;
   --rule: #16181d;
   /* The chip reads as a soft filled capsule, not an outlined one: the border is
    * only a shade darker than the fill, so the edge blends rather than drawing a
@@ -61,13 +65,21 @@
   /* The middot between contact tokens on one row. */
   --sep: #9aa0aa;
 
-
-  /* Vertical rhythm comes from these four values rather than per-rule numbers,
-   * so spacing stays even across sections. */
+  /*
+   * Vertical rhythm: the scale every Kite template shares, one step per level
+   * of the hierarchy, each a clear jump from the one inside it.
+   *
+   *   xs  2pt   contact rows, a cert line
+   *   sm  4pt   between bullets and skill rows
+   *   md  8pt   a section rule to its content; a label to its values
+   *   lg  14pt  between entries — a new job reads as a new group
+   *   xl  24pt  above a section
+   */
   --gap-xs: 2pt;
   --gap-sm: 4pt;
   --gap-md: 8pt;
-  --gap-lg: 13pt;
+  --gap-lg: 14pt;
+  --gap-xl: 24pt;
 
   --bullet-indent: 11pt;
   /* The skills label gutter. Wide enough that "Tools / Infra" stays on one line
@@ -236,12 +248,14 @@ a[href]:hover {
 /* --------------------------------------------------------------- sections --- */
 
 .section {
-  margin-top: var(--gap-lg);
+  margin-top: var(--gap-xl);
 }
 
+/* The title sits closer to its rule (4pt) than the rule does to the content
+ * (8pt), so title and rule read as one unit announcing what follows. */
 .section-title {
   margin: 0 0 var(--gap-md);
-  padding-bottom: 2.5pt;
+  padding-bottom: var(--gap-sm);
   border-bottom: 1px solid var(--rule);
   font-size: var(--fs-section);
   font-weight: var(--fw-bold);
@@ -264,7 +278,9 @@ a[href]:hover {
   display: flex;
   align-items: baseline;
   gap: var(--gap-md);
-  margin-bottom: var(--gap-md);
+  /* The bullet step, so the skills block keeps the page's rhythm instead of
+   * floating looser than the lists around it. */
+  margin-bottom: var(--gap-sm);
   /* A label stranded at a page foot with its values overleaf reads as a
    * different section, so a row moves whole. `break-inside` is also the one
    * primitive Paged.js implements, so the preview agrees with the PDF here.
@@ -301,7 +317,7 @@ a[href]:hover {
 /* A skills line with no colon has no label to hang in the gutter, so it spans
  * the full content width. */
 .skill-plain {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-sm);
 }
 
 /* Certifications keep the run-in bold label. */
@@ -321,9 +337,13 @@ a[href]:hover {
  * of one blunt rule there are three narrow ones below: the header can never be
  * stranded, a bullet can never split mid-sentence, and chips never land alone.
  * The split therefore always falls between bullets.
+ *
+ * A full line of air between entries: the one gap that has to beat every gap
+ * inside an entry. At 8pt it barely beat the 4.8pt of leading inside a wrapped
+ * bullet, and a page of jobs read as one list.
  */
 .entry {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-lg);
 }
 
 /*
@@ -418,8 +438,11 @@ a[href]:hover {
   font-weight: var(--fw-bold);
 }
 
+/* Semibold so the timeline still scans down the right edge, but one grey step
+ * under the company so the row has one loud end, not two. */
 .entry-head .right {
   font-weight: var(--fw-semi);
+  color: var(--ink-soft);
 }
 
 /* Role and location are metadata hanging off the company/date row above, so they

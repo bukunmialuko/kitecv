@@ -44,8 +44,12 @@
   --leading: 1.5;
 
   --ink: #111111;
-  --ink-soft: #3a3a3a;
-  --ink-muted: #737373;
+  /* Three greys, one job each: ink for what you look for (name, headings,
+   * companies), soft for what you read (every line of running text), muted for
+   * what you glance at (dates, roles, labels) — 5.3:1, comfortably over the
+   * 4.5:1 small text needs. */
+  --ink-soft: #333333;
+  --ink-muted: #6b6b6b;
   --dot: #a3a3a3;
   --divider: #e6e6e6;
   --chip-bg: #f1f1f1;
@@ -97,7 +101,7 @@ html {
 body {
   margin: 0;
   background: var(--paper, #fff);
-  color: var(--ink);
+  color: var(--ink-soft);
   font-family: var(--font-sans);
   font-size: var(--fs-base);
   font-weight: var(--fw-regular);
@@ -153,6 +157,7 @@ a[href]:hover {
 }
 
 .name {
+  color: var(--ink);
   /* Optical margin: a 26pt capital carries side-bearing the body text does not,
    * so set flush it starts 0.9pt inside the column the text below starts on.
    * Pulled back by measurement to share one left edge. */
@@ -222,6 +227,7 @@ a[href]:hover {
 /* Sentence case, semibold, no rule: on a product page a heading is announced
  * by weight and the air above it, not by a line under it. */
 .section-title {
+  color: var(--ink);
   margin: 0 0 var(--gap-md);
   font-size: var(--fs-section);
   font-weight: var(--fw-semi);
@@ -234,7 +240,6 @@ a[href]:hover {
 
 .summary {
   margin: 0;
-  color: var(--ink-soft);
 }
 
 .skill-row {
@@ -275,6 +280,7 @@ a[href]:hover {
 }
 
 .cert-label {
+  color: var(--ink);
   font-weight: var(--fw-semi);
 }
 
@@ -356,6 +362,7 @@ a[href]:hover {
 }
 
 .entry-head .left {
+  color: var(--ink);
   font-size: var(--fs-entry);
   font-weight: var(--fw-semi);
   letter-spacing: -0.01em;
@@ -366,10 +373,14 @@ a[href]:hover {
   color: var(--ink-muted);
 }
 
+/* The role steps down a grey from the company above it, the way Plex's does:
+ * company (ink, semibold) -> role (muted, regular) -> bullets (ink). In the
+ * old near-black it read as one more line of body text and the entry lost its
+ * head. */
 .entry-sub .left {
   font-size: var(--fs-role);
-  font-weight: var(--fw-medium);
-  color: var(--ink-soft);
+  font-weight: var(--fw-regular);
+  color: var(--ink-muted);
 }
 
 .entry-sub .right {
