@@ -95,10 +95,13 @@ export interface Cv {
   sectionBreaks: SectionKey[];
 }
 
-/** Front-matter toggles. */
+/**
+ * Front-matter toggles. Only what changes *what the CV says* lives here —
+ * presentation (template, paper, chips, QR) is set in the app, so the same
+ * markdown can be exported any way without being edited.
+ */
 export interface CvOptions {
   projects?: boolean;
-  chips?: boolean;
   [key: string]: boolean | string | undefined;
 }
 

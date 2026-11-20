@@ -11,6 +11,10 @@ interface Props {
   onTemplate: (id: string) => void;
   paper: Paper;
   onPaper: (paper: Paper) => void;
+  chips: boolean;
+  onChips: (on: boolean) => void;
+  /** False when no entry has a `Tech:` line, so the switch would do nothing. */
+  hasChips: boolean;
   /** Every header link a code could carry, best first. */
   links: CodeLink[];
   /** The link the code currently carries, after the stored choice is resolved. */
@@ -46,7 +50,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
  * says. Each control here reaches the preview, the PDF and the saved file alike.
  */
 export default function DocumentBar({
-  templateId, onTemplate, paper, onPaper, links, code, onCode, pageCount,
+  templateId, onTemplate, paper, onPaper, chips, onChips, hasChips, links, code, onCode, pageCount,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-hairline px-4 py-2">
@@ -73,6 +77,30 @@ export default function DocumentBar({
             },
           ]}
         />
+      </Field>
+
+      <Field label="Chips">
+        {/* The swatch is a tiny chip, so the control shows what it hides. */}
+        <div className={hasChips ? "" : "opacity-50"} title={hasChips ? undefined : "No Tech: lines in this CV yet"}>
+          <Segmented<"on" | "off">
+            label="Technology chips"
+            value={chips ? "on" : "off"}
+            onChange={(value) => onChips(value === "on")}
+            options={[
+              {
+                value: "on",
+                label: (
+                  <>
+                    <span aria-hidden="true" className="inline-block h-2 w-3.5 border border-current" />
+                    On
+                  </>
+                ),
+                title: "Each Tech: line becomes a row of chips under its entry",
+              },
+              { value: "off", label: "Off", title: "Hide every chip — your Tech: lines stay in the markdown" },
+            ]}
+          />
+        </div>
       </Field>
 
       <Field label="QR">

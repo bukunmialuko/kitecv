@@ -15,7 +15,6 @@ here.
 ```markdown
 ---
 projects: true
-chips: true
 ---
 
 # Jordan Avery
@@ -59,7 +58,7 @@ Experience, Projects and Education all share one shape. Learn it once:
 | the next plain line | The **sub row** — `<left> \| <right>`, both optional |
 | `- …` | A bullet |
 | an **indented** line | A continuation of the bullet above it |
-| `Tech: a, b, c` | The chips under the entry |
+| `Tech: a, b, c` | The chips under the entry (hidden everywhere by the app's Chips switch) |
 
 What each column means per section:
 
@@ -188,20 +187,20 @@ The `---` at the very top of a file is front matter, not a page break.
 
 ## Front matter
 
-Optional, and only two keys:
+Optional, and one key:
 
 ```markdown
 ---
 projects: true
-chips: true
 ---
 ```
 
 - `projects: false` — drop the whole Projects section while keeping its content
-  in the file.
-- `chips: false` — drop the `Tech:` chips everywhere.
+  in the file. `--no-projects` on the command line overrides it.
 
-`--no-projects` and `--no-chips` on the command line override both.
+Front matter is for what the CV *says*. How it looks — template, paper, chips,
+QR code — is set in the app, so one file exports every way without an edit. A
+`chips:` line left over from an older CV is ignored and reported in Analysis.
 
 ## Inline formatting
 

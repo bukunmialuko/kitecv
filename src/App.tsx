@@ -21,6 +21,7 @@ const KEY_THEME = "kite:theme";
 const KEY_AUTOFORMAT = "kite:autoformat";
 const KEY_PAPER = "kite:paper";
 const KEY_CODE = "kite:code";
+const KEY_CHIPS = "kite:chips";
 
 /** Pagination costs ~150–300ms, so only it is debounced. Analysis is instant. */
 const REPAGINATE_MS = 250;
@@ -55,6 +56,8 @@ export default function App() {
   const [codeChoice, setCodeChoice] = useState<CodeChoice>(
     () => localStorage.getItem(KEY_CODE) ?? "auto",
   );
+  // On unless switched off — the same default the old `chips:` key had.
+  const [chips, setChips] = useState(() => localStorage.getItem(KEY_CHIPS) !== "off");
   const [tab, setTab] = useState<"preview" | "analysis" | "guide">("preview");
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [pageCount, setPageCount] = useState(0);
@@ -81,6 +84,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(KEY_CODE, codeChoice);
   }, [codeChoice]);
+
+  useEffect(() => {
+    localStorage.setItem(KEY_CHIPS, chips ? "on" : "off");
+  }, [chips]);
 
   // Every template but the default is a separate chunk, so switching is async.
   // The previously loaded template stays on screen until the new one arrives —
@@ -121,9 +128,9 @@ export default function App() {
         paper,
         qr: code?.href,
         showProjects: settledParse.options.projects !== false,
-        showChips: settledParse.options.chips !== false,
+        showChips: chips,
       }),
-    [settledParse, template, paper, code],
+    [settledParse, template, paper, code, chips],
   );
 
   const htmlRef = useRef(html);
@@ -201,6 +208,12 @@ export default function App() {
   );
 
   const fileName = `${slugify(settledParse.data.name)}.md`;
+  // Whether any entry has a Tech: line for the Chips switch to act on.
+  const hasChips = [
+    ...settledParse.data.experience,
+    ...settledParse.data.projects,
+    ...settledParse.data.education,
+  ].some((entry) => entry.technologies.length > 0);
   const words = markdown.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu)?.length ?? 0;
   // The draft reaches localStorage on the same debounce the preview uses.
   const saved = markdown === settled;
@@ -264,6 +277,9 @@ export default function App() {
               onTemplate={setTemplateId}
               paper={paper}
               onPaper={setPaper}
+              chips={chips}
+              onChips={setChips}
+              hasChips={hasChips}
               links={links}
               code={code}
               onCode={setCodeChoice}

@@ -94,6 +94,17 @@ function finding(
   return { category: "structure", type, severity: "warning", section, index, message };
 }
 
+/**
+ * Front-matter keys that used to mean something and no longer do. Still parsed
+ * like any key — so an old CV loads without complaint — but reported, so the
+ * author learns why the line stopped working and where the setting went.
+ */
+const RETIRED_OPTIONS: Record<string, string> = {
+  chips:
+    'The "chips:" front-matter line is no longer read — show or hide chips with ' +
+    "the Chips switch beside Paper. The line can be deleted.",
+};
+
 /** The leading `--- … ---` block, captured whole so `format.ts` can re-emit it. */
 export const FRONT_MATTER_RE = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/;
 
@@ -428,6 +439,11 @@ function plainLines(lines: string[]): string[] {
 export function parseCv(text: string): ParseResult {
   const findings: Finding[] = [];
   const { options, body } = parseFrontMatter(text);
+  for (const [key, message] of Object.entries(RETIRED_OPTIONS)) {
+    if (key in options) {
+      findings.push({ category: "structure", type: "retired_option", severity: "info", section: null, index: null, message });
+    }
+  }
 
   // Split into the header block plus one bucket per `##` heading, remembering
   // the order they appeared in — the renderer follows the document, not a

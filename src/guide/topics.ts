@@ -116,7 +116,9 @@ Senior Software Engineer | Remote
 Senior Software Engineer | Remote
 - Cut checkout p95 latency from 840ms to 310ms.
 Tech: Go, PostgreSQL, Redis, Kubernetes`,
-    note: "`Technologies:` and `Stack:` work the same way.",
+    note:
+      "`Technologies:` and `Stack:` work the same way. To hide every chip without " +
+      "deleting a line, turn Chips off above the preview.",
   },
   {
     id: "skills",
@@ -201,7 +203,6 @@ Engineer | Bristol, UK
       "deleting them, which is handy when tailoring for one application.",
     markdown: `---
 projects: false
-chips: false
 ---
 
 # Jordan Avery
@@ -213,7 +214,9 @@ jordan@example.com
 Engineer | Remote
 - Did a thing.
 Tech: Go, Redis`,
-    note: "`projects: false` drops the Projects section; `chips: false` drops every Tech line.",
+    note:
+      "`projects: false` drops the Projects section. Chips are not a markdown " +
+      "setting: hide them all with the Chips switch above the preview.",
   },
   {
     id: "inline",

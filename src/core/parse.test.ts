@@ -9,8 +9,17 @@ jane@example.com
 
 describe("front matter", () => {
   it("reads booleans in every accepted spelling", () => {
-    const { options } = parseFrontMatter("---\nprojects: false\nchips: yes\nx: off\n---\n# A\n");
-    expect(options).toEqual({ projects: false, chips: true, x: false });
+    const { options } = parseFrontMatter("---\nprojects: false\ny: yes\nx: off\n---\n# A\n");
+    expect(options).toEqual({ projects: false, y: true, x: false });
+  });
+
+  // Chips moved to a switch in the app. An old CV that still says `chips: false`
+  // must load cleanly and be told why the line no longer does anything.
+  it("reports a retired chips: line as info, and nothing else", () => {
+    const { findings } = parseCv("---\nchips: false\n---\n# A\nEngineer\n");
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ type: "retired_option", severity: "info" });
+    expect(parseCv("---\nprojects: false\n---\n# A\n").findings).toEqual([]);
   });
 
   it("leaves a document without front matter untouched", () => {

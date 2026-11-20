@@ -1,6 +1,5 @@
 ---
 projects: true
-chips: true
 ---
 
 # Jordan Avery
