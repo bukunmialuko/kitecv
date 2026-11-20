@@ -40,8 +40,9 @@ generated-with trailer.
 These are load-bearing. Breaking one silently degrades the output.
 
 - **`src/core/` imports no React and touches no DOM.** It is the future VS Code
-  package. `assets.ts` and `assets.plex.ts` are the only files allowed to know
-  about Vite (`?raw`, `?inline`).
+  package. Only the `assets*.ts` files may know about Vite (`?raw`, `?inline`):
+  `assets.ts`, plus one lazy `assets.<template>.ts` per non-default template
+  (`assets.plex.ts`, `assets.modern.ts`).
 - **Tailwind stops at the iframe.** The shell uses Tailwind; the CV document uses
   plain CSS in `core/templates/*.css`. The CV must render standalone in the
   iframe, on the server and in the saved PDF — none of which can reach the app's
@@ -51,14 +52,16 @@ These are load-bearing. Breaking one silently degrades the output.
   Each family costs 50-150KB base64-inlined, so hoisting them into one shared
   block would put Plex's four faces into every Classic export. `render.test.ts`
   pins the per-template face counts.
-- **A template only asks for weights its files actually contain.** Archivo, Inter
-  and IBM Plex Sans ship here as variable fonts, so any weight in range is a real
-  instance. IBM Plex Mono has no variable build — only 400 and 500 are embedded,
+- **A template only asks for weights its files actually contain.** Archivo, Inter,
+  IBM Plex Sans and Geist ship here as variable fonts, so any weight in
+  range is a real instance. Only upright faces are embedded: no template may ask
+  for italic, or the browser slants the roman. IBM Plex Mono has no variable build — only 400 and 500 are embedded,
   and asking for 600 would get a synthesised approximation instead.
 - **Only the default template is imported eagerly.** Every other one is fetched
   by `loadTemplate()` through a dynamic `import()`, which is the only reason its
   fonts stay out of the main bundle — base64 font data barely compresses, so
   Plex alone is ~116KB gzipped. A single static `import … from "./assets.plex"`
+  (or `./assets.modern`)
   anywhere in the eager graph silently folds that chunk back into the main
   bundle, and the only symptom is the build's size report. Check it after
   touching `core/templates/index.ts` or either `assets*.ts`.
@@ -82,7 +85,29 @@ These are load-bearing. Breaking one silently degrades the output.
   a second definition of what a bullet looks like would drift.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
-- **The CV document stays black-on-white in both themes.** It is a printed page.
+- **Every template shares one spacing scale** — 2/4/8/14/24pt, one step per
+  level (contact rows / bullets / rule-to-content / entries / sections), so a
+  new job always reads as a new group. Templates differ in typography, never in
+  rhythm.
+- **Readability floors, on both papers:** every text role at least 4.5:1
+  against its ground (small text below that is deciphered, not read), nothing
+  under 7.6pt, and body text matched across templates by x-height (5.2pt), not
+  point size — so switching template never makes the CV look smaller. Bullet markers are centred on the
+  x-height by *measurement in Chrome*, not derived from font metrics (which put
+  Plex 0.8pt off); re-measure after changing a template's leading or body size.
+- **`***text***` is a highlight, not bold-italic.** It renders as `<mark>`,
+  which every template must style (`--accent`, plus `--accent-glow` on black
+  paper) — an unstyled `<mark>` gets the browser's yellow background. Colour,
+  weight and glow only, so a highlight never moves a line.
+- **The CV's colours follow its paper, never the app theme.** White paper or
+  black (`#222222`, white ink) is a document setting, like the template; the
+  shell's light/dark toggle never reaches the iframe. Paper swaps colour tokens
+  only — never a size, weight or gap — so a CV paginates identically on both,
+  and `render.test.ts` pins the body as byte-identical across papers.
+- **Black paper needs `@page { background }`.** Measured: a root background
+  alone stops at the page margin and leaves a white frame round every PDF
+  sheet. `pageCss()` emits it, because `@page` cannot read a custom property;
+  templates own only the ink, under `:root[data-paper="dark"]`.
 - **Entries are allowed to span pages.** `break-inside: avoid` on `.entry` was
   removed: it pushed tall roles whole and left dead space behind them. The narrow
   rules that replaced it (header `break-after: avoid`, `li break-inside: avoid`,
@@ -123,3 +148,7 @@ PDF-out.
 npm test          # vitest — core suites, the fixture test, and the guide check
 npm run build     # tsc --noEmit && vite build; must pass before proposing a commit
 ```
+
+`npm run dev` also serves `/api/pdf` (a dev-only plugin in `vite.config.ts`
+that runs the real handler against the installed Chrome), so Download works
+locally without `vercel dev`.

@@ -77,6 +77,24 @@ body {
   text-transform: uppercase;
 }
 
+/* The PDF render bar: a solid third of the width sweeping across. */
+@keyframes kite-indeterminate {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
+.kite-indeterminate {
+  animation: kite-indeterminate 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kite-indeterminate {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
 /* Huge tight-tracked display type, the primary visual element. */
 .display {
   font-weight: 700;

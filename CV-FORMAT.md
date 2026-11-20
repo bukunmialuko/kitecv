@@ -15,12 +15,11 @@ here.
 ```markdown
 ---
 projects: true
-chips: true
 ---
 
 # Jordan Avery
 Software Engineer
-Bristol, United Kingdom | +44 7700 900123
+Bristol, UK | +44 7700 900123
 jordan.avery@example.com
 linkedin.com/in/jordanavery
 github.com/jordanavery
@@ -59,7 +58,7 @@ Experience, Projects and Education all share one shape. Learn it once:
 | the next plain line | The **sub row** — `<left> \| <right>`, both optional |
 | `- …` | A bullet |
 | an **indented** line | A continuation of the bullet above it |
-| `Tech: a, b, c` | The chips under the entry |
+| `Tech: a, b, c` | The chips under the entry (hidden everywhere by the app's Chips switch) |
 
 What each column means per section:
 
@@ -106,7 +105,7 @@ Dates are checked; see [Report](#report) below.
 ```markdown
 # Jordan Avery
 Software Engineer
-Bristol, United Kingdom | +44 7700 900123
+Bristol, UK | +44 7700 900123
 jordan.avery@example.com
 ```
 
@@ -188,25 +187,28 @@ The `---` at the very top of a file is front matter, not a page break.
 
 ## Front matter
 
-Optional, and only two keys:
+Optional, and one key:
 
 ```markdown
 ---
 projects: true
-chips: true
 ---
 ```
 
 - `projects: false` — drop the whole Projects section while keeping its content
-  in the file.
-- `chips: false` — drop the `Tech:` chips everywhere.
+  in the file. `--no-projects` on the command line overrides it.
 
-`--no-projects` and `--no-chips` on the command line override both.
+Front matter is for what the CV *says*. How it looks — template, paper,
+chips — is set in the app, so one file exports every way without an edit. A
+`chips:` line left over from an older CV is ignored and reported in Analysis.
 
 ## Inline formatting
 
 Inside bullets, the summary and descriptions: `**bold**`, `*italic*`,
-`` `code` ``, `[text](url)`, and bare URLs (auto-linked). Everything is HTML
+`***highlight***`, `` `code` ``, `[text](url)`, and bare URLs (auto-linked).
+A highlight sets its text in the template's accent green — deep on white
+paper, brighter with a soft glow on black — for the numbers you want read
+first. It is not bold-italic: no template embeds an italic face. Everything is HTML
 escaped first, so `&`, `<` and `>` are safe to type.
 
 ## Canonical form

@@ -1,11 +1,10 @@
 ---
 projects: true
-chips: true
 ---
 
 # Jordan Avery
 Software Engineer
-Bristol, United Kingdom | +44 7700 900123
+Bristol, UK | +44 7700 900123
 jordan.avery@example.com
 linkedin.com/in/jordanavery
 github.com/jordanavery

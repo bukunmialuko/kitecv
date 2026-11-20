@@ -94,6 +94,17 @@ function finding(
   return { category: "structure", type, severity: "warning", section, index, message };
 }
 
+/**
+ * Front-matter keys that used to mean something and no longer do. Still parsed
+ * like any key — so an old CV loads without complaint — but reported, so the
+ * author learns why the line stopped working and where the setting went.
+ */
+const RETIRED_OPTIONS: Record<string, string> = {
+  chips:
+    'The "chips:" front-matter line is no longer read — show or hide chips with ' +
+    "the Chips switch beside Paper. The line can be deleted.",
+};
+
 /** The leading `--- … ---` block, captured whole so `format.ts` can re-emit it. */
 export const FRONT_MATTER_RE = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/;
 
@@ -120,6 +131,33 @@ export function parseFrontMatter(text: string): { options: CvOptions; body: stri
     else options[key] = value;
   }
   return { options, body: text.slice(match[0].length) };
+}
+
+/**
+ * Delete retired keys from the front matter, and the whole block if nothing is
+ * left in it.
+ *
+ * Run when a draft is *opened* — loaded, uploaded, dropped — never while it is
+ * being typed, and deliberately not by `formatMarkdown`: the formatter's promise
+ * is that it moves whitespace and never words, which is what lets it put the
+ * caret back under the same letter. An old file sheds its dead line once, on
+ * the way in. Comments and every live key are kept as typed.
+ */
+export function stripRetiredOptions(text: string): string {
+  const match = FRONT_MATTER_RE.exec(text);
+  if (!match) return text;
+  const lines = match[1].split(/\r?\n/);
+  const kept = lines.filter((line) => {
+    const at = line.indexOf(":");
+    if (at === -1 || line.trim().startsWith("#")) return true;
+    return !(line.slice(0, at).trim().toLowerCase() in RETIRED_OPTIONS);
+  });
+  if (kept.length === lines.length) return text;
+
+  const rest = text.slice(match[0].length);
+  if (kept.some((line) => line.trim())) return `---\n${kept.join("\n")}\n---\n${rest}`;
+  // Nothing left: drop the block and the blank lines that only separated it.
+  return rest.replace(/^(?:[ \t]*\r?\n)+/, "");
 }
 
 /** Pull `[Company](https://…)` apart into ["Company", "https://…"]. */
@@ -428,6 +466,11 @@ function plainLines(lines: string[]): string[] {
 export function parseCv(text: string): ParseResult {
   const findings: Finding[] = [];
   const { options, body } = parseFrontMatter(text);
+  for (const [key, message] of Object.entries(RETIRED_OPTIONS)) {
+    if (key in options) {
+      findings.push({ category: "structure", type: "retired_option", severity: "info", section: null, index: null, message });
+    }
+  }
 
   // Split into the header block plus one bucket per `##` heading, remembering
   // the order they appeared in — the renderer follows the document, not a

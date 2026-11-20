@@ -16,6 +16,9 @@ const PAGE_WIDTH_PX = 794;
  *
  * This must never reach `renderDocument()` — it would print.
  *
+ * Each sheet takes `--paper`, which `pageCss()` emits for the document, so a
+ * black-paper CV previews on black sheets exactly as its PDF prints.
+ *
  * The ground behind the sheets is flat panel grey, not the shell's dot grid.
  * The grid cannot survive here: the iframe is transform-scaled to fit the pane,
  * which scales its background with it, so a 24px grid inside landed at ~21px
@@ -29,7 +32,7 @@ const PREVIEW_CSS = `
     margin: 0; padding: 20px 0 28px;
   }
   .pagedjs_page {
-    background: #fff;
+    background: var(--paper, #fff);
     border: 1px solid var(--kite-hairline);
     margin: 0 auto 34px;
     position: relative;

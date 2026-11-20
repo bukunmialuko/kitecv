@@ -10,6 +10,8 @@ export interface EditorHandle {
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  /** A whole file dropped onto the editor — opened, not typed. */
+  onOpen: (text: string) => void;
   /** Format once the typing stops. */
   auto: boolean;
   ref?: Ref<EditorHandle>;
@@ -30,7 +32,7 @@ function caretOnBlankLine(area: HTMLTextAreaElement): boolean {
   return area.value.slice(from, to).trim() === "";
 }
 
-export default function Editor({ value, onChange, auto, ref }: Props) {
+export default function Editor({ value, onChange, onOpen, auto, ref }: Props) {
   const [over, setOver] = useState(false);
   const [composing, setComposing] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,7 +98,7 @@ export default function Editor({ value, onChange, auto, ref }: Props) {
         e.preventDefault();
         setOver(false);
         const file = e.dataTransfer.files?.[0];
-        if (file) onChange(await file.text());
+        if (file) onOpen(await file.text());
       }}
     >
       <textarea

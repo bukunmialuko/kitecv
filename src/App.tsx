@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Analysis from "./components/Analysis";
+import DocumentBar from "./components/DocumentBar";
 import Editor, { type EditorHandle } from "./components/Editor";
 import Landing from "./components/Landing";
 import Guide from "./components/Guide";
 import Preview from "./components/Preview";
 import Toolbar, { type PdfState } from "./components/Toolbar";
 import { sampleMarkdown } from "./core/assets";
-import { buildBundle } from "./core/bundle";
-import { parseCv } from "./core/parse";
+import { buildBundle, slugify } from "./core/bundle";
+import { parseCv, stripRetiredOptions } from "./core/parse";
 import { renderDocument } from "./core/render";
 import { buildReport } from "./core/report";
 import { DEFAULT_TEMPLATE_ID, defaultTemplate, loadTemplate } from "./core/templates";
+import type { Paper } from "./core/types";
 
 const KEY_MD = "kite:markdown";
 const KEY_TEMPLATE = "kite:template";
 const KEY_THEME = "kite:theme";
 const KEY_AUTOFORMAT = "kite:autoformat";
+const KEY_PAPER = "kite:paper";
+const KEY_CHIPS = "kite:chips";
 
 /** Pagination costs ~150–300ms, so only it is debounced. Analysis is instant. */
 const REPAGINATE_MS = 250;
@@ -30,9 +34,12 @@ function download(blob: Blob, filename: string): void {
 }
 
 export default function App() {
-  const [markdown, setMarkdown] = useState<string | null>(
-    () => localStorage.getItem(KEY_MD),
-  );
+  // A draft saved by an older build sheds its retired front-matter lines once,
+  // on the way in — never while it is being typed.
+  const [markdown, setMarkdown] = useState<string | null>(() => {
+    const saved = localStorage.getItem(KEY_MD);
+    return saved === null ? null : stripRetiredOptions(saved);
+  });
   const [templateId, setTemplateId] = useState(
     () => localStorage.getItem(KEY_TEMPLATE) ?? DEFAULT_TEMPLATE_ID,
   );
@@ -42,6 +49,11 @@ export default function App() {
   const [autoFormat, setAutoFormat] = useState(
     () => localStorage.getItem(KEY_AUTOFORMAT) !== "off",
   );
+  const [paper, setPaper] = useState<Paper>(
+    () => (localStorage.getItem(KEY_PAPER) === "dark" ? "dark" : "light"),
+  );
+  // On unless switched off — the same default the old `chips:` key had.
+  const [chips, setChips] = useState(() => localStorage.getItem(KEY_CHIPS) !== "off");
   const [tab, setTab] = useState<"preview" | "analysis" | "guide">("preview");
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [pageCount, setPageCount] = useState(0);
@@ -61,6 +73,14 @@ export default function App() {
     localStorage.setItem(KEY_AUTOFORMAT, autoFormat ? "on" : "off");
   }, [autoFormat]);
 
+  useEffect(() => {
+    localStorage.setItem(KEY_PAPER, paper);
+  }, [paper]);
+
+  useEffect(() => {
+    localStorage.setItem(KEY_CHIPS, chips ? "on" : "off");
+  }, [chips]);
+
   // Every template but the default is a separate chunk, so switching is async.
   // The previously loaded template stays on screen until the new one arrives —
   // the swap is one repaint with no blank frame and no spinner.
@@ -74,6 +94,18 @@ export default function App() {
       cancelled = true;
     };
   }, [templateId]);
+
+  // A loaded template's faces join the shell too, so the font picker can set
+  // that template's name in its real typeface. Nothing is fetched for this:
+  // Classic is in the main bundle, and the others arrive only once picked.
+  useEffect(() => {
+    const id = `kite-face-${template.id}`;
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = template.fontCss;
+    document.head.append(style);
+  }, [template]);
 
   // Debounced together: the localStorage write and the value the preview reads.
   const [settled, setSettled] = useState(markdown ?? "");
@@ -95,10 +127,11 @@ export default function App() {
     () =>
       renderDocument(settledParse.data, {
         template,
+        paper,
         showProjects: settledParse.options.projects !== false,
-        showChips: settledParse.options.chips !== false,
+        showChips: chips,
       }),
-    [settledParse, template],
+    [settledParse, template, paper, chips],
   );
 
   const htmlRef = useRef(html);
@@ -133,7 +166,8 @@ export default function App() {
     }
   }, [settledParse.data.name]);
 
-  const load = useCallback((text: string) => {
+  const load = useCallback((raw: string) => {
+    const text = stripRetiredOptions(raw);
     setMarkdown(text);
     setSettled(text);
     localStorage.setItem(KEY_MD, text);
@@ -156,20 +190,39 @@ export default function App() {
   const tabButton = (id: "preview" | "analysis" | "guide", label: string, badge?: number) => (
     <button
       onClick={() => setTab(id)}
-      className={`meta px-4 py-2.5 border-b-2 ${
-        tab === id ? "border-ink" : "border-transparent text-muted hover:text-ink"
+      role="tab"
+      aria-selected={tab === id}
+      className={`meta flex h-full items-center gap-2 border-b-2 px-4 transition-colors ${
+        tab === id ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"
       }`}
     >
       {label}
-      {badge ? <span className="ml-2 border border-hairline px-1.5 py-0.5">{badge}</span> : null}
+      {badge ? (
+        <span
+          className={`border px-1.5 py-px text-[10px] ${
+            report.summary.errorCount ? "border-sev-error text-sev-error" : "border-hairline"
+          }`}
+        >
+          {badge}
+        </span>
+      ) : null}
     </button>
   );
+
+  const fileName = `${slugify(settledParse.data.name)}.md`;
+  // Whether any entry has a Tech: line for the Chips switch to act on.
+  const hasChips = [
+    ...settledParse.data.experience,
+    ...settledParse.data.projects,
+    ...settledParse.data.education,
+  ].some((entry) => entry.technologies.length > 0);
+  const words = markdown.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu)?.length ?? 0;
+  // The draft reaches localStorage on the same debounce the preview uses.
+  const saved = markdown === settled;
 
   return (
     <div className="flex h-full flex-col">
       <Toolbar
-        templateId={templateId}
-        onTemplate={setTemplateId}
         dark={dark}
         onToggleTheme={() => setDark((d) => !d)}
         onUpload={load}
@@ -177,7 +230,7 @@ export default function App() {
         autoFormat={autoFormat}
         onToggleAutoFormat={() => setAutoFormat((on) => !on)}
         onDownloadMd={() =>
-          download(new Blob([markdown], { type: "text/markdown" }), "cv.md")
+          download(new Blob([markdown], { type: "text/markdown" }), fileName)
         }
         onDownloadPdf={downloadPdf}
         onHome={() => {
@@ -188,22 +241,50 @@ export default function App() {
       />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
-        <div className="min-h-0 border-hairline lg:border-r">
-          <Editor ref={editorRef} value={markdown} onChange={setMarkdown} auto={autoFormat} />
+        <div className="flex min-h-0 flex-col border-hairline lg:border-r">
+          {/* Same height as the tab row opposite, so the two panes share one
+              horizon line. */}
+          <div className="flex h-10 shrink-0 items-center gap-3 border-b border-hairline px-4">
+            <span className="meta text-ink">Markdown</span>
+            <span className="truncate font-mono text-[11px] text-muted" title="The name your download will use">
+              {fileName}
+            </span>
+            <div className="flex-1" />
+            <span className="meta hidden text-[10px] text-muted sm:inline">
+              {words.toLocaleString()} words
+            </span>
+            <span
+              className="meta flex items-center gap-1.5 text-[10px] text-muted"
+              title="Your draft is kept in this browser, never on a server"
+            >
+              <span aria-hidden="true" className={`size-1.5 border border-current ${saved ? "bg-current" : ""}`} />
+              {saved ? "Saved" : "Saving"}
+            </span>
+          </div>
+          <div className="min-h-0 flex-1">
+            <Editor ref={editorRef} value={markdown} onChange={setMarkdown} onOpen={load} auto={autoFormat} />
+          </div>
         </div>
 
         <div className="flex min-h-0 flex-col border-t border-hairline lg:border-t-0">
-          <div className="flex items-center border-b border-hairline">
+          <div role="tablist" className="flex h-10 shrink-0 items-stretch border-b border-hairline">
             {tabButton("preview", "Preview")}
             {tabButton("analysis", "Analysis", report.findings.length)}
             {tabButton("guide", "Guide")}
-            <div className="flex-1" />
-            {tab === "preview" && pageCount > 0 && (
-              <span className="meta text-muted px-4">
-                {pageCount} {pageCount === 1 ? "page" : "pages"}
-              </span>
-            )}
           </div>
+
+          {tab === "preview" && (
+            <DocumentBar
+              templateId={templateId}
+              onTemplate={setTemplateId}
+              paper={paper}
+              onPaper={setPaper}
+              chips={chips}
+              onChips={setChips}
+              hasChips={hasChips}
+              pageCount={pageCount}
+            />
+          )}
 
           <div className="min-h-0 flex-1">
             {/* Both stay mounted: re-mounting the preview would re-run Paged.js

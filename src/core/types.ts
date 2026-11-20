@@ -95,10 +95,13 @@ export interface Cv {
   sectionBreaks: SectionKey[];
 }
 
-/** Front-matter toggles. */
+/**
+ * Front-matter toggles. Only what changes *what the CV says* lives here —
+ * presentation (template, paper, chips) is set in the app, so the same
+ * markdown can be exported any way without being edited.
+ */
 export interface CvOptions {
   projects?: boolean;
-  chips?: boolean;
   [key: string]: boolean | string | undefined;
 }
 
@@ -156,10 +159,18 @@ export interface Template {
   fontCss: string;
 }
 
+/**
+ * The sheet the CV is printed on. Independent of the app's light/dark theme: the
+ * shell follows the person's eyes, the paper follows what they chose to send.
+ */
+export type Paper = "light" | "dark";
+
 export interface RenderOptions {
   template?: Template;
   showProjects?: boolean;
   showChips?: boolean;
   page?: "a4" | "letter";
   fontSize?: number;
+  /** White (the default) or black `#222222` with white ink, edge to edge. */
+  paper?: Paper;
 }

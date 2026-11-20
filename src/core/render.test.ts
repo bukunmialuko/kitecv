@@ -44,6 +44,15 @@ describe("inline", () => {
     expect(inline("`c`")).toBe("<code>c</code>");
   });
 
+  it("renders ***text*** as a highlight, leaving ** and * as they were", () => {
+    expect(inline("cut latency by ***60%***")).toBe("cut latency by <mark>60%</mark>");
+    expect(inline("***60%*** and **40%** and *x*")).toBe("<mark>60%</mark> and <strong>40%</strong> and <em>x</em>");
+  });
+
+  it("keeps a highlight inside a code span literal", () => {
+    expect(inline("`***60%***`")).toBe("<code>***60%***</code>");
+  });
+
   it("renders markdown links and bare URLs", () => {
     expect(inline("[docs](https://x.example)")).toContain('href="https://x.example"');
     expect(inline("see https://x.example/y")).toContain('<a href="https://x.example/y"');
@@ -126,6 +135,32 @@ describe("renderDocument is self-contained", () => {
   });
 });
 
+describe("paper", () => {
+  const light = renderDocument(cv(sampleMarkdown));
+  const dark = renderDocument(cv(sampleMarkdown), { paper: "dark" });
+
+  it("prints on white by default, with no page background to paint", () => {
+    expect(light).toContain('<html lang="en">');
+    expect(light).toContain("--paper: #ffffff;");
+    expect(light).not.toMatch(/@page \{[^}]*background/);
+  });
+
+  // A root background alone stops at the page margin, leaving a white frame
+  // round every sheet of the PDF. Only `@page` reaches the edge.
+  it("paints black paper edge to edge through @page", () => {
+    expect(dark).toContain('<html lang="en" data-paper="dark">');
+    expect(dark).toContain("--paper: #222222;");
+    expect(dark).toMatch(/@page \{[^}]*background: #222222;/);
+  });
+
+  // Colours only: if paper changed a single box, line breaks would move and the
+  // preview of one paper would lie about the PDF of the other.
+  it("changes nothing in the body", () => {
+    const body = (html: string) => html.slice(html.indexOf("<body>"));
+    expect(body(dark)).toBe(body(light));
+  });
+});
+
 /**
  * Fonts hang off the template rather than the document, and this is the test
  * that keeps them there. Each family costs 50-150KB once base64-inlined, so the
@@ -137,9 +172,18 @@ describe("templates carry their own fonts", () => {
     renderDocument(cv(sampleMarkdown), { template: await loadTemplate(id) });
   const faces = (html: string) => html.match(/@font-face/g)?.length ?? 0;
 
-  it("embeds one face for Classic and four for Plex", async () => {
+  it("embeds one face for Classic, four for Plex and one for Modern", async () => {
     expect(faces(await doc("classic"))).toBe(1);
     expect(faces(await doc("plex"))).toBe(4);
+    expect(faces(await doc("modern"))).toBe(1);
+  });
+
+  it("keeps a Modern export to Geist alone", async () => {
+    const modern = await doc("modern");
+    expect(modern).toContain("font-family: 'Geist'");
+    for (const family of ["Inter", "Archivo", "IBM Plex"]) {
+      expect(modern).not.toContain(`font-family: '${family}`);
+    }
   });
 
   it("keeps a Classic export free of the Plex families", async () => {

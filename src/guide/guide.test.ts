@@ -99,9 +99,16 @@ describe("snippets prove what their prose claims", () => {
   it("frontmatter: the toggles are read, not rendered as content", () => {
     const { data, options } = byId("frontmatter");
     expect(options.projects).toBe(false);
-    expect(options.chips).toBe(false);
+    // Chips are an app setting now; the guide must not teach the retired key.
+    expect(options).not.toHaveProperty("chips");
     // The leading `---` is front matter, never a page break.
     expect(data.experience[0].pageBreak).toBe(false);
+  });
+
+  it("inline: three asterisks render as a highlight, not bold-italic", () => {
+    const html = renderBody(byId("inline").data);
+    expect(html).toContain("<mark>40M</mark>");
+    expect(html).toContain("<strong>React</strong>");
   });
 
   it("analysis: the example really is a reversed date range", () => {

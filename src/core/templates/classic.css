@@ -3,9 +3,11 @@
  * Two rules run through everything here:
  *   1. One content grid. Section rules, headings, entry rows, bullets, chips and
  *      skills all share a single left edge and a single right edge.
- *   2. The document is always black-on-white. It is a printed page, so it does
- *      not follow the repo's light/dark theme convention — only the preview
- *      shell around it is themed.
+ *   2. The document's colours come from its paper, never from the app theme.
+ *      White paper by default; `data-paper="dark"` on the root swaps the ink
+ *      tokens below for black paper. The sheet colour itself (`--paper`, and
+ *      the `@page` background that carries it into the margins) is emitted by
+ *      `pageCss()`, because `@page` cannot read a custom property.
  *
  * `--page-size`, `--page-margin` and `--content-width` are emitted by html.py
  * ahead of this file, because `@page { size: … }` cannot read a custom property.
@@ -39,16 +41,20 @@
   --fs-title: 10.5pt;
   --fs-section: 10.5pt;
   --fs-contact: 8.4pt;
-  --fs-chip: 7.4pt;
-  --fs-skill-label: 7pt;
+  /* 7.6pt is the floor for any text on the page: below it a print x-height
+   * drops under 4pt and the word stops reading at a glance. */
+  --fs-chip: 7.6pt;
+  --fs-skill-label: 7.6pt;
   /* The role and location line, a step under body text. */
   --fs-role: 8.9pt;
 
   --ink: #16181d;
   --ink-soft: #40454e;
-  /* One step lighter than --ink-soft: the skill label is a signpost for the
-   * column beside it, so it has to recede rather than compete with the values. */
-  --ink-muted: #8a8f98;
+  /* One step lighter than --ink-soft: the skill label, role and location are
+   * signposts, so they recede rather than compete. 5:1 against white — the old
+   * #8a8f98 was 3.2:1, under the 4.5:1 that small text needs to be read rather
+   * than deciphered. */
+  --ink-muted: #6b7079;
   --rule: #16181d;
   /* The chip reads as a soft filled capsule, not an outlined one: the border is
    * only a shade darker than the fill, so the edge blends rather than drawing a
@@ -56,18 +62,48 @@
   --chip-bg: #f4f5f7;
   --chip-border: #e7e9ed;
   --chip-ink: #3b4048;
+  /* The middot between contact tokens on one row. */
+  --sep: #9aa0aa;
+  /* `***text***` highlights. */
+  --accent: #15803d;
 
-  /* Vertical rhythm comes from these four values rather than per-rule numbers,
-   * so spacing stays even across sections. */
+  /*
+   * Vertical rhythm: the scale every Kite template shares, one step per level
+   * of the hierarchy, each a clear jump from the one inside it.
+   *
+   *   xs  2pt   contact rows, a cert line
+   *   sm  4pt   between bullets and skill rows
+   *   md  8pt   a section rule to its content; a label to its values
+   *   lg  14pt  between entries — a new job reads as a new group
+   *   xl  24pt  above a section
+   */
   --gap-xs: 2pt;
   --gap-sm: 4pt;
   --gap-md: 8pt;
-  --gap-lg: 13pt;
+  --gap-lg: 14pt;
+  --gap-xl: 24pt;
 
   --bullet-indent: 11pt;
   /* The skills label gutter. Wide enough that "Tools / Infra" stays on one line
    * and narrow enough that "Frameworks / Libraries" wraps after the slash. */
   --skill-label-col: 92pt;
+}
+
+/*
+ * Black paper (#222222). Only colours change here — never a size, weight or
+ * spacing — so a CV paginates identically on either paper.
+ */
+:root[data-paper="dark"] {
+  --ink: #ffffff;
+  --ink-soft: #d4d4d4;
+  --ink-muted: #a0a0a0;
+  --rule: #ffffff;
+  --chip-bg: #2e2e2e;
+  --chip-border: #3c3c3c;
+  --chip-ink: #e8e8e8;
+  --sep: #6e6e6e;
+  --accent: #4ade80;
+  --accent-glow: rgba(74, 222, 128, 0.45);
 }
 
 *,
@@ -81,12 +117,12 @@
 }
 
 html {
-  background: #fff;
+  background: var(--paper, #fff);
 }
 
 body {
   margin: 0;
-  background: #fff;
+  background: var(--paper, #fff);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--fs-base);
@@ -171,6 +207,10 @@ a[href]:hover {
  * icons form a straight vertical column down the right edge. */
 .contact {
   flex: none;
+  /* Drops the first row so its capitals start level with the name's: one top
+   * line across the header. Measured in Chrome — the line boxes alone left the
+   * contacts 0.67pt high. Re-measure if the name or contact size changes. */
+  margin-top: 0.67pt;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -198,7 +238,7 @@ a[href]:hover {
 }
 
 .contact-sep {
-  color: #9aa0aa;
+  color: var(--sep);
 }
 
 .icon {
@@ -208,15 +248,18 @@ a[href]:hover {
   fill: currentColor;
 }
 
+
 /* --------------------------------------------------------------- sections --- */
 
 .section {
-  margin-top: var(--gap-lg);
+  margin-top: var(--gap-xl);
 }
 
+/* The title sits closer to its rule (4pt) than the rule does to the content
+ * (8pt), so title and rule read as one unit announcing what follows. */
 .section-title {
   margin: 0 0 var(--gap-md);
-  padding-bottom: 2.5pt;
+  padding-bottom: var(--gap-sm);
   border-bottom: 1px solid var(--rule);
   font-size: var(--fs-section);
   font-weight: var(--fw-bold);
@@ -239,7 +282,9 @@ a[href]:hover {
   display: flex;
   align-items: baseline;
   gap: var(--gap-md);
-  margin-bottom: var(--gap-md);
+  /* The bullet step, so the skills block keeps the page's rhythm instead of
+   * floating looser than the lists around it. */
+  margin-bottom: var(--gap-sm);
   /* A label stranded at a page foot with its values overleaf reads as a
    * different section, so a row moves whole. `break-inside` is also the one
    * primitive Paged.js implements, so the preview agrees with the PDF here.
@@ -276,7 +321,7 @@ a[href]:hover {
 /* A skills line with no colon has no label to hang in the gutter, so it spans
  * the full content width. */
 .skill-plain {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-sm);
 }
 
 /* Certifications keep the run-in bold label. */
@@ -296,9 +341,13 @@ a[href]:hover {
  * of one blunt rule there are three narrow ones below: the header can never be
  * stranded, a bullet can never split mid-sentence, and chips never land alone.
  * The split therefore always falls between bullets.
+ *
+ * A full line of air between entries: the one gap that has to beat every gap
+ * inside an entry. At 8pt it barely beat the 4.8pt of leading inside a wrapped
+ * bullet, and a page of jobs read as one list.
  */
 .entry {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-lg);
 }
 
 /*
@@ -393,8 +442,11 @@ a[href]:hover {
   font-weight: var(--fw-bold);
 }
 
+/* Semibold so the timeline still scans down the right edge, but one grey step
+ * under the company so the row has one loud end, not two. */
 .entry-head .right {
   font-weight: var(--fw-semi);
+  color: var(--ink-soft);
 }
 
 /* Role and location are metadata hanging off the company/date row above, so they
@@ -435,7 +487,10 @@ a[href]:hover {
   content: "";
   position: absolute;
   left: calc(var(--bullet-indent) * -1);
-  top: 0.5em;
+  /* Centred on the x-height, where the eye reads a lowercase line: measured in
+   * Chrome against the first line's baseline. 0.5em sat 1.5pt high, nearer the
+   * capitals. Re-measure if the leading or body size changes. */
+  top: 0.66em;
   width: 3.1pt;
   height: 3.1pt;
   background: var(--ink);
@@ -478,4 +533,23 @@ code {
   padding: 0.5pt 2.5pt;
   background: var(--chip-bg);
   border-radius: 2pt;
+}
+
+/* -------------------------------------------------------------- highlight --- */
+
+/*
+ * `***text***` — the one colour a CV carries, for the numbers that prove the
+ * work. A deep green on white (5.0:1); on black paper a brighter green (9.1:1)
+ * with a soft glow, the neon that only reads as light against a dark page.
+ * Colour, weight and glow only — never a size or spacing — so highlighting a
+ * number cannot move a line.
+ */
+mark {
+  background: none;
+  color: var(--accent);
+  font-weight: var(--fw-semi);
+}
+
+:root[data-paper="dark"] mark {
+  text-shadow: 0 0 0.45em var(--accent-glow);
 }

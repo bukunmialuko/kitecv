@@ -1,0 +1,482 @@
+/* Kite CV — "Modern" template.
+ *
+ * Same semantic classes as Classic and Plex; one family, Geist, set the way a
+ * modern product page is set: a tight-tracked display name, sentence-case
+ * headings, whitespace doing the work rules do elsewhere, and colour stepping
+ * down in three greys instead of weights stepping up.
+ *
+ *   Display   the name — semibold, mixed case, tracked tight
+ *   Headings  section titles — semibold, sentence case, no rule beneath
+ *   Text      everything a reader reads
+ *   Quiet     dates, locations, labels, chips — the same text, one grey down
+ *
+ * Geist ships here as a genuine variable font (100-900), so every weight below
+ * is a real instance. Only the upright is embedded; the template never asks
+ * for italic.
+ *
+ * `--page-margin`, `--content-width` and `--paper` are emitted by `pageCss()`
+ * ahead of this file, because `@page` cannot read a custom property. Colours
+ * follow the paper, never the app theme: see the `data-paper="dark"` block.
+ */
+
+:root {
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  --fw-semi: 600;
+  --fw-medium: 500;
+  --fw-regular: 400;
+
+  --fs-base: 9.8pt;
+  --fs-name: 26pt;
+  --fs-tagline: 11pt;
+  /* A clear step above the 10.3pt entry name, so a heading never competes
+   * with the company beneath it: 26 > 12 > 10.3 > 9.8. */
+  --fs-section: 12pt;
+  --fs-entry: 10.3pt;
+  --fs-role: 9.6pt;
+  --fs-meta: 9pt;
+  --fs-contact: 8.8pt;
+  --fs-label: 9pt;
+  --fs-chip: 7.8pt;
+
+  /* 1.5 x 9.8pt = a 14.7pt line: the unit the spacing scale is measured by. */
+  --leading: 1.5;
+
+  --ink: #111111;
+  /* Three greys, one job each: ink for what you look for (name, headings,
+   * companies), soft for what you read (every line of running text), muted for
+   * what you glance at (dates, roles, labels) — 5.3:1, comfortably over the
+   * 4.5:1 small text needs. */
+  --ink-soft: #333333;
+  --ink-muted: #6b6b6b;
+  --dot: #a3a3a3;
+  --divider: #e6e6e6;
+  --chip-bg: #f1f1f1;
+  --sep: #b0b0b0;
+  /* `***text***` highlights. */
+  --accent: #15803d;
+
+
+  /* The shared scale, one step per level of the hierarchy:
+   *   xs 2pt   contact rows
+   *   sm 4pt   between bullets and skill rows
+   *   md 8pt   a heading to its content; a label to its values
+   *   lg 14pt  between entries
+   *   xl 24pt  above a section */
+  --gap-xs: 2pt;
+  --gap-sm: 4pt;
+  --gap-md: 8pt;
+  --gap-lg: 14pt;
+  --gap-xl: 24pt;
+
+  --bullet-indent: 11pt;
+  --skill-label-col: 92pt;
+}
+
+/* Black paper (#222222): colours only, so pagination is identical on either
+ * paper. */
+:root[data-paper="dark"] {
+  --ink: #ffffff;
+  --ink-soft: #d9d9d9;
+  --ink-muted: #a3a3a3;
+  --dot: #7a7a7a;
+  --divider: #3a3a3a;
+  --chip-bg: #2f2f2f;
+  --sep: #6e6e6e;
+  --accent: #4ade80;
+  --accent-glow: rgba(74, 222, 128, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  /* Pseudo-elements need this too — `*` alone does not match them, and the
+   * bullet marker below is a painted box rather than a character. */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+html {
+  background: var(--paper, #fff);
+}
+
+body {
+  margin: 0;
+  background: var(--paper, #fff);
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--leading);
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+/* On screen the document is sized to the printable area so what you see is what
+ * prints. In print the page box already applies the margin, so the wrapper
+ * collapses to nothing. */
+.cv {
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--page-margin) 0;
+}
+
+@media print {
+  .cv {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Links stay live — clickable in the browser and in the PDF — but inherit their
+ * colour so the printed page does not turn blue. */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a[href]:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- header --- */
+
+/* The one rule on the page: a hairline closing the header, so the identity
+ * block reads as a masthead and everything under it as the document. */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-lg);
+  padding-bottom: var(--gap-lg);
+  border-bottom: 1px solid var(--divider);
+}
+
+.header-left {
+  min-width: 0;
+}
+
+.name {
+  color: var(--ink);
+  /* Optical margin: a 26pt capital carries side-bearing the body text does not,
+   * so set flush it starts 0.9pt inside the column the text below starts on.
+   * Pulled back by measurement to share one left edge. */
+  margin: 0 0 0 -0.034em;
+  font-size: var(--fs-name);
+  font-weight: var(--fw-semi);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.job-title {
+  margin-top: var(--gap-xs);
+  font-size: var(--fs-tagline);
+  letter-spacing: -0.005em;
+  color: var(--ink-muted);
+}
+
+/* Contact rows are flush right and each row's last child is its icon, so those
+ * icons form a straight vertical column down the right edge. */
+.contact {
+  flex: none;
+  /* Drops the first row so its capitals start level with the name's: one top
+   * line across the header. Measured in Chrome — the line boxes alone left the
+   * contacts 0.54pt high. Re-measure if the name or contact size changes. */
+  margin-top: 0.54pt;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--gap-xs);
+  font-size: var(--fs-contact);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3.5pt;
+}
+
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5pt;
+  white-space: nowrap;
+}
+
+.contact-sep {
+  color: var(--sep);
+}
+
+.icon {
+  width: 8.6pt;
+  height: 8.6pt;
+  flex: none;
+  fill: currentColor;
+  color: var(--ink-muted);
+}
+
+/* --------------------------------------------------------------- sections --- */
+
+.section {
+  margin-top: var(--gap-xl);
+}
+
+/* Sentence case, semibold, no rule: on a product page a heading is announced
+ * by weight and the air above it, not by a line under it. */
+.section-title {
+  color: var(--ink);
+  margin: 0 0 var(--gap-md);
+  font-size: var(--fs-section);
+  font-weight: var(--fw-semi);
+  letter-spacing: -0.02em;
+  /* Never leave a heading stranded at the foot of a page. (Honoured by Chrome
+   * for the PDF; a no-op in the Paged.js preview — see CLAUDE.md.) */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.summary {
+  margin: 0;
+}
+
+.skill-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-sm);
+  /* A row moves whole: `break-inside` is the one primitive Paged.js honours,
+   * so the preview agrees with the PDF here. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.skill-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Labels stay in sentence case: a grey step is signpost enough, and capitals
+ * would bring back the shouting the rest of the page avoids. */
+.skill-key {
+  flex: 0 0 var(--skill-label-col);
+  font-size: var(--fs-label);
+  font-weight: var(--fw-medium);
+  color: var(--ink-muted);
+}
+
+.skill-values {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.skill-plain {
+  margin-bottom: var(--gap-sm);
+}
+
+.cert-line {
+  margin-bottom: var(--gap-xs);
+}
+
+.cert-label {
+  color: var(--ink);
+  font-weight: var(--fw-semi);
+}
+
+/* ---------------------------------------------------------------- entries --- */
+
+/* A full line of air between entries — the one gap that has to beat every gap
+ * inside an entry. Entries may span a page; the narrow rules below decide
+ * where a split may fall. */
+.entry {
+  margin-bottom: var(--gap-lg);
+}
+
+/* `break-after` / `break-before: avoid` are honoured by Chrome, which makes the
+ * PDF, and are no-ops in Paged.js. See CLAUDE.md. */
+.entry-head,
+.entry-sub {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.entry ul {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+.section > .entry:first-of-type {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+.entry li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.chips {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Author controls from the markdown: extra blank lines add a step of space, a
+ * `---` line starts a new page. See CV-FORMAT.md. */
+.entry.gap-1 { margin-top: var(--gap-md); }
+.entry.gap-2 { margin-top: var(--gap-lg); }
+.entry.gap-3 { margin-top: calc(var(--gap-lg) * 2); }
+
+.page-break {
+  break-before: page;
+  page-break-before: always;
+}
+
+.entry.page-break {
+  margin-top: 0;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+/* A real two-column row: the left column absorbs the slack and may wrap, the
+ * right column never does. */
+.entry-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-md);
+}
+
+.entry-row .left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.entry-row .right {
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  /* Equal-width figures, so the dates form a straight edge down the page. */
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-head .left {
+  color: var(--ink);
+  font-size: var(--fs-entry);
+  font-weight: var(--fw-semi);
+  letter-spacing: -0.01em;
+}
+
+.entry-head .right {
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+
+/* The role steps down a grey from the company above it, the way Plex's does:
+ * company (ink, semibold) -> role (muted, regular) -> bullets (ink). In the
+ * old near-black it read as one more line of body text and the entry lost its
+ * head. */
+.entry-sub .left {
+  font-size: var(--fs-role);
+  font-weight: var(--fw-regular);
+  color: var(--ink-muted);
+}
+
+.entry-sub .right {
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+
+.entry ul {
+  margin: var(--gap-sm) 0 0;
+  padding-left: var(--bullet-indent);
+  list-style: none;
+}
+
+.entry li {
+  position: relative;
+  margin-bottom: var(--gap-sm);
+}
+
+/*
+ * A small round dot one grey down from the text: on a product page the marker
+ * is a quiet guide, not punctuation. Drawn rather than typed, so it renders
+ * identically on every machine that makes the PDF.
+ *
+ * Centred on the x-height — measured in Chrome against the real first-line
+ * baseline, not derived from font metrics. Re-measure if the leading or body
+ * size changes.
+ */
+.entry li::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--bullet-indent) * -1 + 1pt);
+  top: 0.65em;
+  width: 3pt;
+  height: 3pt;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.entry li:last-child {
+  margin-bottom: 0;
+}
+
+/* Soft pills with no outline: a fill one step off the paper is all a tag
+ * needs, and a border on every one turns a row of them into a grid. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3pt 3.5pt;
+  margin-top: var(--gap-sm);
+}
+
+.chip {
+  padding: 1.6pt 6.5pt;
+  background: var(--chip-bg);
+  border-radius: 999px;
+  font-size: var(--fs-chip);
+  font-weight: var(--fw-medium);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* No monospace is embedded, so a code span stays in Geist and is marked by a
+ * tint — the same choice Classic makes, for the same reason. */
+code {
+  font-family: inherit;
+  font-size: 0.94em;
+  padding: 0.5pt 2.5pt;
+  background: var(--chip-bg);
+  border-radius: 3pt;
+}
+
+/* -------------------------------------------------------------- highlight --- */
+
+/*
+ * `***text***` — the one colour a CV carries, for the numbers that prove the
+ * work. A deep green on white (5.0:1); on black paper a brighter green (9.1:1)
+ * with a soft glow, the neon that only reads as light against a dark page.
+ * Colour, weight and glow only — never a size or spacing — so highlighting a
+ * number cannot move a line.
+ */
+mark {
+  background: none;
+  color: var(--accent);
+  font-weight: var(--fw-semi);
+}
+
+:root[data-paper="dark"] mark {
+  text-shadow: 0 0 0.45em var(--accent-glow);
+}
+
+/* Running text is the soft grey, so plain bold has to step up to full ink to
+ * read as emphasis — on black paper a bold in the body grey barely showed. */
+strong {
+  color: var(--ink);
+}
