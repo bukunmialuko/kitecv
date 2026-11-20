@@ -36,14 +36,16 @@ download is the file you previewed — down to the page breaks.
   produced it, so the file you archive is one you can edit again.
 - **A guide built in.** The Guide tab documents the whole format beside your
   editor. Every example in it is checked by the test suite.
-- **Two typesettings.** Switch template above the preview and the preview, the
-  PDF and the saved file all follow. Your markdown never changes — templates
-  differ by stylesheet and typeface only.
+- **Three typefaces.** Pick Classic, Plex or Modern above the preview — each
+  name is set in its own kind of type — and the preview, the PDF and the saved
+  file all follow. Your markdown never changes; templates differ by stylesheet
+  and typeface only.
 - **White or black paper.** Black is `#222222` with white ink, painted to the
   edge of every PDF page rather than stopping at the margin. Paper changes
   colour only, so a CV breaks across pages identically on either.
 - **Scan to open.** A QR code of the best link in your header — your site, then
-  LinkedIn, then GitHub, or whichever you pick — printed beside your contacts.
+  LinkedIn, then GitHub, or whichever you pick — closing the CV in a small card
+  with the address it opens printed beside it.
   Clickable in the PDF; on black paper it sits on a white tile so every phone
   camera reads it. The test suite decodes it to prove it scans.
 
@@ -103,7 +105,8 @@ whatever follows onto a new page.
 | | Typeface | Reads as |
 |---|---|---|
 | **Classic** | Inter throughout | Dense and neutral — the default |
-| **Plex** | Archivo for the name, IBM Plex Sans for text, IBM Plex Mono for dates, headers and labels | Editorial, wider-set |
+| **Plex** | Archivo for the name, IBM Plex Sans for text, IBM Plex Mono for dates, headers and labels | Technical, airy |
+| **Modern** | Geist throughout — tight-tracked name, sentence-case headings, soft pill tags | A contemporary product page |
 
 Adding one is a `.css` file plus a case in `core/templates/index.ts` — the
 renderer emits semantic classes and never changes. Every font is subset and
@@ -127,7 +130,8 @@ about the bundler.
 ## Credits
 
 Typeset in [Inter](https://rsms.me/inter/), [Archivo](https://omnibus-type.com/fonts/archivo/)
-and [IBM Plex](https://www.ibm.com/plex/) — all SIL OFL, all bundled. The
+[IBM Plex](https://www.ibm.com/plex/) and
+[Geist](https://github.com/vercel/geist-font) — all SIL OFL, all bundled. The
 renderer began life as a Python tool in
 [skill-bridge](https://github.com/bukunmialuko/skill-bridge); the test suite pins
 this port to that verified output.

@@ -54,12 +54,23 @@ export default function DocumentBar({
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-hairline px-4 py-2">
-      <Field label="Type">
+      <Field label="Font">
+        {/* Each name is set in its own kind of type — grotesque, mono, serif —
+            the way a font menu shows every font in itself: the choice is seen
+            before it is read, and one click away. */}
         <Segmented
-          label="Template"
+          label="Font"
           value={templateId}
           onChange={onTemplate}
-          options={templateMeta.map((t) => ({ value: t.id, label: t.name }))}
+          options={templateMeta.map((t) => ({
+            value: t.id,
+            title: `${t.name} — ${t.description}`,
+            label: (
+              <span className="text-[12.5px] leading-none" style={{ fontFamily: t.specimen }}>
+                {t.name}
+              </span>
+            ),
+          }))}
         />
       </Field>
 

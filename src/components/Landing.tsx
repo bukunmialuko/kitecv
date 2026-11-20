@@ -14,9 +14,9 @@ const FEATURES: Array<[string, string]> = [
   ["Real PDF", "Selectable text, live links, embedded fonts. Readable by the ATS that screens it."],
   ["Page-exact preview", "Paginated as the PDF is, so you see where things land before you export."],
   ["Timeline checks", "Gaps, reversed dates, entries out of order, missing sections."],
-  ["Two typesettings", "Switch template and the preview, the PDF and the saved file all follow. Your markdown never changes."],
+  ["Three typefaces", "Classic, Plex or Modern. Switch and the preview, the PDF and the saved file all follow — your markdown never changes."],
   ["White or black paper", "White ink on #222 for a CV made to be read on screen — painted to the edge of every page, not just behind the text."],
-  ["Scan to open", "A QR code of your site, LinkedIn or GitHub beside your contacts. Scannable in print, clickable in the PDF."],
+  ["Scan to open", "A small QR code of your site, LinkedIn or GitHub closes the CV, captioned with where it goes. Clickable in the PDF too."],
 ];
 
 export default function Landing({ onSample, onBlank, onUpload, onGuide }: Props) {

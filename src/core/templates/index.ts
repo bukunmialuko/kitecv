@@ -45,10 +45,40 @@ const classic: Template = {
   fontCss: face("Inter", "100 900", interFontDataUri),
 };
 
-/** Id and name only — enough to build the picker without pulling in any font. */
-export const templateMeta: Array<{ id: string; name: string }> = [
-  { id: "classic", name: "Classic" },
-  { id: "plex", name: "Plex" },
+export interface TemplateMeta {
+  id: string;
+  name: string;
+  /** One line for the picker: the typeface and how it reads. */
+  description: string;
+  /**
+   * A CSS font stack for setting the template's own name in the picker. It
+   * names the real family first and its generic class last, so the picker
+   * shows the right *kind* of type — grotesque, mono, serif — without loading a
+   * lazy template's font just to draw one word.
+   */
+  specimen: string;
+}
+
+/** Everything the picker needs, without pulling in any font. */
+export const templateMeta: TemplateMeta[] = [
+  {
+    id: "classic",
+    name: "Classic",
+    description: "Inter throughout — dense and neutral",
+    specimen: "Inter, ui-sans-serif, system-ui, sans-serif",
+  },
+  {
+    id: "plex",
+    name: "Plex",
+    description: "Archivo, IBM Plex Sans and Mono — technical, with monospaced detail",
+    specimen: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+  },
+  {
+    id: "modern",
+    name: "Modern",
+    description: "Geist — crisp and contemporary, set like a product page",
+    specimen: "Geist, ui-sans-serif, system-ui, sans-serif",
+  },
 ];
 
 /**
@@ -78,6 +108,15 @@ export async function loadTemplate(id: string | undefined): Promise<Template> {
         face("IBM Plex Mono", "400", plex.plexMono400FontDataUri),
         face("IBM Plex Mono", "500", plex.plexMono500FontDataUri),
       ].join("\n"),
+    };
+  }
+  if (id === "modern") {
+    const modern = await import("../assets.modern");
+    return {
+      id: "modern",
+      name: "Modern",
+      css: modern.modernCss,
+      fontCss: face("Geist", "100 900", modern.geistFontDataUri),
     };
   }
   return classic;

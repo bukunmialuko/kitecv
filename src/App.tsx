@@ -106,6 +106,18 @@ export default function App() {
     };
   }, [templateId]);
 
+  // A loaded template's faces join the shell too, so the font picker can set
+  // that template's name in its real typeface. Nothing is fetched for this:
+  // Classic is in the main bundle, and the others arrive only once picked.
+  useEffect(() => {
+    const id = `kite-face-${template.id}`;
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = template.fontCss;
+    document.head.append(style);
+  }, [template]);
+
   // Debounced together: the localStorage write and the value the preview reads.
   const [settled, setSettled] = useState(markdown ?? "");
   useEffect(() => {

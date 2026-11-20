@@ -40,8 +40,9 @@ generated-with trailer.
 These are load-bearing. Breaking one silently degrades the output.
 
 - **`src/core/` imports no React and touches no DOM.** It is the future VS Code
-  package. `assets.ts` and `assets.plex.ts` are the only files allowed to know
-  about Vite (`?raw`, `?inline`).
+  package. Only the `assets*.ts` files may know about Vite (`?raw`, `?inline`):
+  `assets.ts`, plus one lazy `assets.<template>.ts` per non-default template
+  (`assets.plex.ts`, `assets.modern.ts`).
 - **Tailwind stops at the iframe.** The shell uses Tailwind; the CV document uses
   plain CSS in `core/templates/*.css`. The CV must render standalone in the
   iframe, on the server and in the saved PDF — none of which can reach the app's
@@ -51,14 +52,16 @@ These are load-bearing. Breaking one silently degrades the output.
   Each family costs 50-150KB base64-inlined, so hoisting them into one shared
   block would put Plex's four faces into every Classic export. `render.test.ts`
   pins the per-template face counts.
-- **A template only asks for weights its files actually contain.** Archivo, Inter
-  and IBM Plex Sans ship here as variable fonts, so any weight in range is a real
-  instance. IBM Plex Mono has no variable build — only 400 and 500 are embedded,
+- **A template only asks for weights its files actually contain.** Archivo, Inter,
+  IBM Plex Sans and Geist ship here as variable fonts, so any weight in
+  range is a real instance. Only upright faces are embedded: no template may ask
+  for italic, or the browser slants the roman. IBM Plex Mono has no variable build — only 400 and 500 are embedded,
   and asking for 600 would get a synthesised approximation instead.
 - **Only the default template is imported eagerly.** Every other one is fetched
   by `loadTemplate()` through a dynamic `import()`, which is the only reason its
   fonts stay out of the main bundle — base64 font data barely compresses, so
   Plex alone is ~116KB gzipped. A single static `import … from "./assets.plex"`
+  (or `./assets.modern`)
   anywhere in the eager graph silently folds that chunk back into the main
   bundle, and the only symptom is the build's size report. Check it after
   touching `core/templates/index.ts` or either `assets*.ts`.
@@ -82,6 +85,11 @@ These are load-bearing. Breaking one silently degrades the output.
   a second definition of what a bullet looks like would drift.
 - **`buildReport(cv, extra?, today?)` keeps `today` injectable.** `Present`
   resolves against it, so tests rot without it.
+- **Plex and Modern share one spacing scale** — 2/4/8/14/24pt, one step per
+  level (contact rows / bullets / rule-to-content / entries / sections), so a
+  new job always reads as a new group. Bullet markers are centred on the
+  x-height by *measurement in Chrome*, not derived from font metrics (which put
+  Plex 0.8pt off); re-measure after changing a template's leading or body size.
 - **The CV's colours follow its paper, never the app theme.** White paper or
   black (`#222222`, white ink) is a document setting, like the template; the
   shell's light/dark toggle never reaches the iframe. Paper swaps colour tokens
@@ -94,7 +102,9 @@ These are load-bearing. Breaking one silently degrades the output.
 - **The QR code has to scan.** `qr.test.ts` replays the drawn SVG path into
   pixels and decodes it with jsQR. On black paper the code stays dark modules
   on a white tile — inverted codes are not read by every phone camera. Its box
-  is the same size on both papers, so toggling paper moves nothing.
+  is the same size on both papers, so toggling paper moves nothing. It closes
+  the document in `.code-card`, captioned with the address it opens — never in
+  the header, where a dense square competed with the name for the first glance.
 - **Entries are allowed to span pages.** `break-inside: avoid` on `.entry` was
   removed: it pushed tall roles whole and left dead space behind them. The narrow
   rules that replaced it (header `break-after: avoid`, `li break-inside: avoid`,

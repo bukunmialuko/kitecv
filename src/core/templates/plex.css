@@ -9,8 +9,8 @@
  *   IBM Plex Sans      everything a reader actually reads — summary, skills,
  *                      company names, roles, bullets
  *
- * Sizes follow the design handoff's px scale converted to points (x0.75), since
- * this is a print document: 40px name, 13.5px body, 11.5px meta, 11px section.
+ * Sizes began as the design handoff's px scale converted to points; spacing has
+ * since been rebuilt on one rhythm — see the scale under :root.
  *
  * `--page-size`, `--page-margin`, `--content-width` and `--paper` are emitted
  * by `pageCss()` ahead of this file, because `@page` cannot read a custom
@@ -33,19 +33,27 @@
   --fw-mono-mid: 500;
   --fw-regular: 400;
 
-  --fs-base: 10.1pt;
+  --fs-base: 10pt;
   --fs-name: 30pt;
-  --fs-tagline: 10.1pt;
+  --fs-tagline: 10pt;
   /* The company name on the entry head. The handoff's spec table calls this
    * size "role" because `###` is the role heading in its markdown; here `###` is
    * the company, so the name follows the markup rather than the table. */
   --fs-entry: 10.5pt;
   --fs-role: 9.4pt;
-  --fs-meta: 8.6pt;
-  --fs-contact: 8.6pt;
-  --fs-section: 8.25pt;
-  --fs-skill-label: 7.9pt;
+  /* One metadata size for every monospace line — dates, location, contacts,
+   * section titles — so the mono voice reads as a single register. */
+  --fs-meta: 8.4pt;
+  --fs-contact: 8.4pt;
+  --fs-section: 8.4pt;
+  --fs-skill-label: 7.8pt;
   --fs-chip: 7.4pt;
+
+  /* Body leading. 1.5 x 10pt = a 15pt line, the unit the spacing scale below
+   * is measured against. The handoff's 1.62 sat above the 1.2-1.45 range a
+   * print text block wants; at ~100 characters a line, 1.5 is the most a long
+   * measure needs before the lines start to drift apart. */
+  --leading: 1.5;
 
   --ink: #111111;
   --ink-soft: #2b2b2b;
@@ -57,19 +65,32 @@
   --chip-border: #e4e4e4;
   --sep: #9a9a9a;
 
-  /* Matched to Plex's taller four-row contact block. See Classic for why the
-   * box is fixed across papers. */
-  --qr-size: 60pt;
-  --qr-pad: 4pt;
+  /* The QR code in the closing card. 34pt of code is 12mm — 0.4mm a module at
+   * version 3, well inside what a phone resolves at reading distance. */
+  --qr-size: 40pt;
+  --qr-pad: 3pt;
   --qr-ground: transparent;
   --qr-ink: var(--ink);
 
-  /* The handoff's spacing steps (2/4/6/8/10/18/26/30px) in points. */
-  --gap-xs: 3pt;
-  --gap-sm: 4.5pt;
-  --gap-md: 7.5pt;
-  --gap-lg: 13.5pt;
-  --gap-xl: 19.5pt;
+  /*
+   * One spacing scale, one step per level of the hierarchy, each a clear jump
+   * from the one below so the eye can tell a new bullet from a new job from a
+   * new section without reading a word:
+   *
+   *   xs  2pt   tight couplings — contact rows, a cert line
+   *   sm  4pt   between bullets and skill rows (~1/4 line)
+   *   md  8pt   a section rule to its content; a label to its values
+   *   lg  14pt  between entries (~1 line) — a new job reads as a new group
+   *   xl  24pt  above a section (~1.6 lines)
+   *
+   * The old scale put entries 7.5pt apart — barely more than the 6pt of air
+   * inside a wrapped bullet — so a page of jobs read as one long list.
+   */
+  --gap-xs: 2pt;
+  --gap-sm: 4pt;
+  --gap-md: 8pt;
+  --gap-lg: 14pt;
+  --gap-xl: 24pt;
 
   --bullet-indent: 12pt;
   /* Plex Mono is a monospace, so its uppercase labels run wider than Inter's at
@@ -114,9 +135,7 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-base);
   font-weight: var(--fw-regular);
-  /* The handoff's 1.62. Plex Sans has a smaller x-height than Inter, so it wants
-   * the extra leading more than Inter did. */
-  line-height: 1.62;
+  line-height: var(--leading);
   font-kerning: normal;
   text-rendering: optimizeLegibility;
 }
@@ -193,7 +212,7 @@ a[href]:hover {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2pt;
+  gap: var(--gap-xs);
   font-family: var(--font-mono);
   font-size: var(--fs-contact);
   font-weight: var(--fw-regular);
@@ -223,40 +242,12 @@ a[href]:hover {
 }
 
 .icon {
-  width: 8.6pt;
-  height: 8.6pt;
+  width: 8.4pt;
+  height: 8.4pt;
   flex: none;
   fill: currentColor;
 }
 
-/* With a code in the header the contact block stops being the last child, and
- * `space-between` would float it to the middle. The auto margin keeps it packed
- * against the code instead; without one it changes nothing. */
-.header > .contact {
-  margin-left: auto;
-}
-
-/* The code is part of the contact group, so it sits closer to the contacts
- * than they sit to the name: the header's gap minus the difference. Padding
- * plus this margin still leaves a quiet zone of six modules on white paper,
- * where four is the spec. */
-.qr {
-  flex: none;
-  display: block;
-  margin-left: calc(var(--gap-md) - var(--gap-lg));
-  width: var(--qr-size);
-  height: var(--qr-size);
-  padding: var(--qr-pad);
-  background: var(--qr-ground);
-  color: var(--qr-ink);
-}
-
-.qr-code {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
-}
 
 /* --------------------------------------------------------------- sections --- */
 
@@ -265,11 +256,14 @@ a[href]:hover {
 }
 
 /* The signature of this theme: monospace, small, heavily tracked, over a
- * 1.5px rule that runs the full content width. */
+ * hairline that runs the full content width. A hairline rather than the old
+ * 1.5px: the heavier rule out-shouted the title it underlines, and on black
+ * paper it banded the page in bright stripes. The title sits closer to its rule
+ * (4pt) than the rule does to the content (8pt), so the two read as one unit. */
 .section-title {
   margin: 0 0 var(--gap-md);
-  padding-bottom: 5.25pt;
-  border-bottom: 1.5px solid var(--rule);
+  padding-bottom: var(--gap-sm);
+  border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: var(--fs-section);
   font-weight: var(--fw-mono-mid);
@@ -291,7 +285,9 @@ a[href]:hover {
   display: flex;
   align-items: baseline;
   gap: var(--gap-md);
-  margin-bottom: var(--gap-md);
+  /* The same step as between bullets, so the skills block keeps the page's
+   * rhythm rather than floating looser than the lists around it. */
+  margin-bottom: var(--gap-sm);
   /* A label stranded at a page foot with its values overleaf reads as a
    * different section, so a row moves whole. `break-inside` is also the one
    * primitive Paged.js implements, so the preview agrees with the PDF. */
@@ -324,7 +320,7 @@ a[href]:hover {
 /* A skills line with no colon has no label to hang in the gutter, so it spans
  * the full content width. */
 .skill-plain {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-sm);
 }
 
 /* Certifications keep the run-in label. */
@@ -343,9 +339,12 @@ a[href]:hover {
  * tall role to the next page and leaves a band of dead space behind it, so
  * instead of one blunt rule there are narrow ones: the header can never be
  * stranded, a bullet can never split mid-sentence, and chips never land alone.
+ *
+ * A full line of air between entries: the one gap on the page that has to beat
+ * every gap inside an entry.
  */
 .entry {
-  margin-bottom: var(--gap-md);
+  margin-bottom: var(--gap-lg);
 }
 
 /*
@@ -483,7 +482,12 @@ a[href]:hover {
   content: "";
   position: absolute;
   left: calc(var(--bullet-indent) * -1);
-  top: 0.62em;
+  /* Centred on the x-height, where the eye reads a lowercase line. Measured in
+   * Chrome against the real first-line baseline rather than derived from font
+   * metrics, which put it 0.8pt low: 0.64em lands within 0.1pt. (The old
+   * 0.62em under 1.62 leading sat 0.9pt high.) Re-measure if the leading or
+   * body size changes. */
+  top: 0.64em;
   width: 3pt;
   height: 3pt;
   background: var(--ink);
@@ -523,4 +527,66 @@ code {
   padding: 0.5pt 2.5pt;
   background: var(--chip-bg);
   border-radius: 2pt;
+}
+
+/* ------------------------------------------------------------- code card --- */
+
+/*
+ * The QR code closes the CV: a hairline, then "Scan to open" and the address,
+ * right-aligned beside the code. It never splits, and never starts a page on
+ * its own — Chrome keeps it with the content above (`break-before: avoid` is a
+ * no-op in the Paged.js preview; see CLAUDE.md).
+ */
+.code-card {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--gap-md);
+  margin-top: var(--gap-lg);
+  padding-top: var(--gap-md);
+  border-top: 1px solid var(--divider);
+  break-inside: avoid;
+  page-break-inside: avoid;
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+.code-text {
+  text-align: right;
+  line-height: 1.4;
+}
+
+.code-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-skill-label);
+  font-weight: var(--fw-mono-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-muted);
+}
+
+.code-url {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+}
+
+/* A fixed box on both papers, so switching never moves a line: on white the
+ * padding is quiet zone, on black it is the white tile the code needs. */
+.qr {
+  flex: none;
+  display: block;
+  width: var(--qr-size);
+  height: var(--qr-size);
+  padding: var(--qr-pad);
+  background: var(--qr-ground);
+  color: var(--qr-ink);
+}
+
+.qr-code {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
 }

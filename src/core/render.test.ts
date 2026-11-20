@@ -159,12 +159,18 @@ describe("qr", () => {
     expect(renderBody(cv(sampleMarkdown))).not.toContain('class="qr"');
   });
 
-  it("puts a linked code after the contact block, inside the header", () => {
+  // The header stays name and contacts only; the code closes the document,
+  // captioned with the address it opens.
+  it("closes the CV with a captioned code card, never in the header", () => {
     const html = renderBody(cv(sampleMarkdown), { qr: url });
     const header = html.slice(0, html.indexOf("</header>"));
-    expect(header).toContain(`<a class="qr" href="${url}"`);
-    expect(header.indexOf('class="contact"')).toBeLessThan(header.indexOf('class="qr"'));
-    expect(header).toContain('<svg class="qr-code"');
+    expect(header).not.toContain("qr");
+    const card = html.slice(html.indexOf('<aside class="code-card">'));
+    expect(html.lastIndexOf("</section>")).toBeLessThan(html.indexOf('<aside class="code-card">'));
+    expect(card).toContain("Scan to open");
+    expect(card).toContain(`<a class="code-url" href="${url}">linkedin.com/in/jordanavery</a>`);
+    expect(card).toContain(`<a class="qr" href="${url}"`);
+    expect(card).toContain('<svg class="qr-code"');
   });
 
   it("escapes the URL it links to", () => {
@@ -187,9 +193,18 @@ describe("templates carry their own fonts", () => {
     renderDocument(cv(sampleMarkdown), { template: await loadTemplate(id) });
   const faces = (html: string) => html.match(/@font-face/g)?.length ?? 0;
 
-  it("embeds one face for Classic and four for Plex", async () => {
+  it("embeds one face for Classic, four for Plex and one for Modern", async () => {
     expect(faces(await doc("classic"))).toBe(1);
     expect(faces(await doc("plex"))).toBe(4);
+    expect(faces(await doc("modern"))).toBe(1);
+  });
+
+  it("keeps a Modern export to Geist alone", async () => {
+    const modern = await doc("modern");
+    expect(modern).toContain("font-family: 'Geist'");
+    for (const family of ["Inter", "Archivo", "IBM Plex"]) {
+      expect(modern).not.toContain(`font-family: '${family}`);
+    }
   });
 
   it("keeps a Classic export free of the Plex families", async () => {

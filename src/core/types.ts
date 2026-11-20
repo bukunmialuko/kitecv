@@ -173,6 +173,6 @@ export interface RenderOptions {
   fontSize?: number;
   /** White (the default) or black `#222222` with white ink, edge to edge. */
   paper?: Paper;
-  /** A URL to print as a scannable QR code beside the contact block. */
+  /** A URL to print as a scannable QR code in a card closing the CV. */
   qr?: string;
 }

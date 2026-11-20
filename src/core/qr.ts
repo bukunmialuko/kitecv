@@ -1,5 +1,5 @@
 /**
- * The scannable code printed beside the contact block.
+ * The scannable code that closes the CV, in a card captioned with its address.
  *
  * A QR code rather than a linear barcode, deliberately: it is the only kind a
  * phone camera opens as a link, and a Code 128 strip carrying a 30-character URL
