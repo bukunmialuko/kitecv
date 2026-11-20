@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { classifyContact, parseCv, parseFrontMatter, splitDateRange, splitLink } from "./parse";
+import {
+  classifyContact,
+  parseCv,
+  parseFrontMatter,
+  splitDateRange,
+  splitLink,
+  stripRetiredOptions,
+} from "./parse";
 
 const header = `# Jane Doe
 Software Engineer
@@ -20,6 +27,31 @@ describe("front matter", () => {
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({ type: "retired_option", severity: "info" });
     expect(parseCv("---\nprojects: false\n---\n# A\n").findings).toEqual([]);
+  });
+
+  it("strips a retired chips: line and keeps every live key", () => {
+    expect(stripRetiredOptions("---\nprojects: true\nchips: true\n---\n\n# A\n")).toBe(
+      "---\nprojects: true\n---\n\n# A\n",
+    );
+  });
+
+  it("drops the block entirely when chips: was all it held", () => {
+    expect(stripRetiredOptions("---\nChips : false\n---\n\n# A\n")).toBe("# A\n");
+  });
+
+  it("keeps a comment, and leaves a file with nothing retired byte-identical", () => {
+    expect(stripRetiredOptions("---\n# why\nchips: false\n---\n# A\n")).toBe("---\n# why\n---\n# A\n");
+    for (const text of ["---\nprojects: false\n---\n# A\n", "# A\nchips: true\n", ""]) {
+      expect(stripRetiredOptions(text)).toBe(text);
+    }
+  });
+
+  it("is idempotent and never changes the CV", () => {
+    const old = "---\nprojects: true\nchips: false\n---\n\n# A\nEngineer\n";
+    const once = stripRetiredOptions(old);
+    expect(stripRetiredOptions(once)).toBe(once);
+    expect(parseCv(once).data).toEqual(parseCv(old).data);
+    expect(parseCv(once).findings).toEqual([]);
   });
 
   it("leaves a document without front matter untouched", () => {

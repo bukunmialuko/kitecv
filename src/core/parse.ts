@@ -133,6 +133,33 @@ export function parseFrontMatter(text: string): { options: CvOptions; body: stri
   return { options, body: text.slice(match[0].length) };
 }
 
+/**
+ * Delete retired keys from the front matter, and the whole block if nothing is
+ * left in it.
+ *
+ * Run when a draft is *opened* — loaded, uploaded, dropped — never while it is
+ * being typed, and deliberately not by `formatMarkdown`: the formatter's promise
+ * is that it moves whitespace and never words, which is what lets it put the
+ * caret back under the same letter. An old file sheds its dead line once, on
+ * the way in. Comments and every live key are kept as typed.
+ */
+export function stripRetiredOptions(text: string): string {
+  const match = FRONT_MATTER_RE.exec(text);
+  if (!match) return text;
+  const lines = match[1].split(/\r?\n/);
+  const kept = lines.filter((line) => {
+    const at = line.indexOf(":");
+    if (at === -1 || line.trim().startsWith("#")) return true;
+    return !(line.slice(0, at).trim().toLowerCase() in RETIRED_OPTIONS);
+  });
+  if (kept.length === lines.length) return text;
+
+  const rest = text.slice(match[0].length);
+  if (kept.some((line) => line.trim())) return `---\n${kept.join("\n")}\n---\n${rest}`;
+  // Nothing left: drop the block and the blank lines that only separated it.
+  return rest.replace(/^(?:[ \t]*\r?\n)+/, "");
+}
+
 /** Pull `[Company](https://…)` apart into ["Company", "https://…"]. */
 export function splitLink(text: string): [string, string] {
   const match = MD_LINK_RE.exec(text.trim());

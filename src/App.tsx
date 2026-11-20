@@ -8,7 +8,7 @@ import Preview from "./components/Preview";
 import Toolbar, { type PdfState } from "./components/Toolbar";
 import { sampleMarkdown } from "./core/assets";
 import { buildBundle, slugify } from "./core/bundle";
-import { parseCv } from "./core/parse";
+import { parseCv, stripRetiredOptions } from "./core/parse";
 import { codeLinks, resolveCodeLink, type CodeChoice } from "./core/qr";
 import { renderDocument } from "./core/render";
 import { buildReport } from "./core/report";
@@ -36,9 +36,12 @@ function download(blob: Blob, filename: string): void {
 }
 
 export default function App() {
-  const [markdown, setMarkdown] = useState<string | null>(
-    () => localStorage.getItem(KEY_MD),
-  );
+  // A draft saved by an older build sheds its retired front-matter lines once,
+  // on the way in — never while it is being typed.
+  const [markdown, setMarkdown] = useState<string | null>(() => {
+    const saved = localStorage.getItem(KEY_MD);
+    return saved === null ? null : stripRetiredOptions(saved);
+  });
   const [templateId, setTemplateId] = useState(
     () => localStorage.getItem(KEY_TEMPLATE) ?? DEFAULT_TEMPLATE_ID,
   );
@@ -165,7 +168,8 @@ export default function App() {
     }
   }, [settledParse.data.name]);
 
-  const load = useCallback((text: string) => {
+  const load = useCallback((raw: string) => {
+    const text = stripRetiredOptions(raw);
     setMarkdown(text);
     setSettled(text);
     localStorage.setItem(KEY_MD, text);
@@ -260,7 +264,7 @@ export default function App() {
             </span>
           </div>
           <div className="min-h-0 flex-1">
-            <Editor ref={editorRef} value={markdown} onChange={setMarkdown} auto={autoFormat} />
+            <Editor ref={editorRef} value={markdown} onChange={setMarkdown} onOpen={load} auto={autoFormat} />
           </div>
         </div>
 
