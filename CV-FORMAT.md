@@ -198,8 +198,8 @@ projects: true
 - `projects: false` — drop the whole Projects section while keeping its content
   in the file. `--no-projects` on the command line overrides it.
 
-Front matter is for what the CV *says*. How it looks — template, paper, chips,
-QR code — is set in the app, so one file exports every way without an edit. A
+Front matter is for what the CV *says*. How it looks — template, paper,
+chips — is set in the app, so one file exports every way without an edit. A
 `chips:` line left over from an older CV is ignored and reported in Analysis.
 
 ## Inline formatting

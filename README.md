@@ -43,11 +43,6 @@ download is the file you previewed — down to the page breaks.
 - **White or black paper.** Black is `#222222` with white ink, painted to the
   edge of every PDF page rather than stopping at the margin. Paper changes
   colour only, so a CV breaks across pages identically on either.
-- **Scan to open.** A QR code of the best link in your header — your site, then
-  LinkedIn, then GitHub, or whichever you pick — closing the CV in a small card
-  with the address it opens printed beside it.
-  Clickable in the PDF; on black paper it sits on a white tile so every phone
-  camera reads it. The test suite decodes it to prove it scans.
 
 ## Run it
 

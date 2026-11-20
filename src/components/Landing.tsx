@@ -16,7 +16,7 @@ const FEATURES: Array<[string, string]> = [
   ["Timeline checks", "Gaps, reversed dates, entries out of order, missing sections."],
   ["Three typefaces", "Classic, Plex or Modern. Switch and the preview, the PDF and the saved file all follow — your markdown never changes."],
   ["White or black paper", "White ink on #222 for a CV made to be read on screen — painted to the edge of every page, not just behind the text."],
-  ["Scan to open", "A small QR code of your site, LinkedIn or GitHub closes the CV, captioned with where it goes. Clickable in the PDF too."],
+  ["Tidy as you type", "Press Format, or leave Auto on, and the markdown settles into clean shape two seconds after you stop. It never changes what your CV says."],
 ];
 
 export default function Landing({ onSample, onBlank, onUpload, onGuide }: Props) {

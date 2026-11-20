@@ -61,15 +61,6 @@
   /* The middot between contact tokens on one row. */
   --sep: #9aa0aa;
 
-  /* The hairline above the closing code card. */
-  --divider: #e3e5e9;
-
-  /* The QR code in the closing card. 34pt of code is 12mm — 0.4mm a module at
-   * version 3, inside what a phone resolves at reading distance. */
-  --qr-size: 40pt;
-  --qr-pad: 3pt;
-  --qr-ground: transparent;
-  --qr-ink: var(--ink);
 
   /* Vertical rhythm comes from these four values rather than per-rule numbers,
    * so spacing stays even across sections. */
@@ -87,10 +78,6 @@
 /*
  * Black paper (#222222). Only colours change here — never a size, weight or
  * spacing — so a CV paginates identically on either paper.
- *
- * The QR code keeps dark modules on a white tile rather than inverting: not
- * every phone camera reads a light-on-dark code, and the code is the one thing
- * on the page that has to work for a machine.
  */
 :root[data-paper="dark"] {
   --ink: #ffffff;
@@ -101,9 +88,6 @@
   --chip-border: #3c3c3c;
   --chip-ink: #e8e8e8;
   --sep: #6e6e6e;
-  --divider: #3a3a3a;
-  --qr-ground: #ffffff;
-  --qr-ink: #222222;
 }
 
 *,
@@ -515,63 +499,4 @@ code {
   padding: 0.5pt 2.5pt;
   background: var(--chip-bg);
   border-radius: 2pt;
-}
-
-/* ------------------------------------------------------------- code card --- */
-
-/*
- * The QR code closes the CV: a hairline, then "Scan to open" and the address,
- * right-aligned beside the code. It never splits, and never starts a page on
- * its own — Chrome keeps it with the content above (`break-before: avoid` is a
- * no-op in the Paged.js preview; see CLAUDE.md).
- */
-.code-card {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--gap-md);
-  margin-top: var(--gap-lg);
-  padding-top: var(--gap-md);
-  border-top: 1px solid var(--divider);
-  break-inside: avoid;
-  page-break-inside: avoid;
-  break-before: avoid;
-  page-break-before: avoid;
-}
-
-.code-text {
-  text-align: right;
-  line-height: 1.4;
-}
-
-.code-label {
-  font-size: var(--fs-skill-label);
-  font-weight: var(--fw-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-muted);
-}
-
-.code-url {
-  font-size: var(--fs-contact);
-  color: var(--ink-soft);
-}
-
-/* A fixed box on both papers, so switching never moves a line: on white the
- * padding is quiet zone, on black it is the white tile the code needs. */
-.qr {
-  flex: none;
-  display: block;
-  width: var(--qr-size);
-  height: var(--qr-size);
-  padding: var(--qr-pad);
-  background: var(--qr-ground);
-  color: var(--qr-ink);
-}
-
-.qr-code {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
 }

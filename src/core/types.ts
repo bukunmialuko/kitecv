@@ -97,7 +97,7 @@ export interface Cv {
 
 /**
  * Front-matter toggles. Only what changes *what the CV says* lives here —
- * presentation (template, paper, chips, QR) is set in the app, so the same
+ * presentation (template, paper, chips) is set in the app, so the same
  * markdown can be exported any way without being edited.
  */
 export interface CvOptions {
@@ -173,6 +173,4 @@ export interface RenderOptions {
   fontSize?: number;
   /** White (the default) or black `#222222` with white ink, edge to edge. */
   paper?: Paper;
-  /** A URL to print as a scannable QR code in a card closing the CV. */
-  qr?: string;
 }

@@ -9,7 +9,6 @@ import Toolbar, { type PdfState } from "./components/Toolbar";
 import { sampleMarkdown } from "./core/assets";
 import { buildBundle, slugify } from "./core/bundle";
 import { parseCv, stripRetiredOptions } from "./core/parse";
-import { codeLinks, resolveCodeLink, type CodeChoice } from "./core/qr";
 import { renderDocument } from "./core/render";
 import { buildReport } from "./core/report";
 import { DEFAULT_TEMPLATE_ID, defaultTemplate, loadTemplate } from "./core/templates";
@@ -20,7 +19,6 @@ const KEY_TEMPLATE = "kite:template";
 const KEY_THEME = "kite:theme";
 const KEY_AUTOFORMAT = "kite:autoformat";
 const KEY_PAPER = "kite:paper";
-const KEY_CODE = "kite:code";
 const KEY_CHIPS = "kite:chips";
 
 /** Pagination costs ~150–300ms, so only it is debounced. Analysis is instant. */
@@ -54,11 +52,6 @@ export default function App() {
   const [paper, setPaper] = useState<Paper>(
     () => (localStorage.getItem(KEY_PAPER) === "dark" ? "dark" : "light"),
   );
-  // "auto" until someone picks: the best link in the header, whichever it is
-  // after their next edit. A picked URL is kept as the URL itself.
-  const [codeChoice, setCodeChoice] = useState<CodeChoice>(
-    () => localStorage.getItem(KEY_CODE) ?? "auto",
-  );
   // On unless switched off — the same default the old `chips:` key had.
   const [chips, setChips] = useState(() => localStorage.getItem(KEY_CHIPS) !== "off");
   const [tab, setTab] = useState<"preview" | "analysis" | "guide">("preview");
@@ -83,10 +76,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(KEY_PAPER, paper);
   }, [paper]);
-
-  useEffect(() => {
-    localStorage.setItem(KEY_CODE, codeChoice);
-  }, [codeChoice]);
 
   useEffect(() => {
     localStorage.setItem(KEY_CHIPS, chips ? "on" : "off");
@@ -134,18 +123,15 @@ export default function App() {
   const report = useMemo(() => buildReport(live.data, live.findings), [live]);
 
   const settledParse = useMemo(() => parseCv(settled), [settled]);
-  const links = useMemo(() => codeLinks(settledParse.data), [settledParse]);
-  const code = useMemo(() => resolveCodeLink(settledParse.data, codeChoice), [settledParse, codeChoice]);
   const html = useMemo(
     () =>
       renderDocument(settledParse.data, {
         template,
         paper,
-        qr: code?.href,
         showProjects: settledParse.options.projects !== false,
         showChips: chips,
       }),
-    [settledParse, template, paper, code, chips],
+    [settledParse, template, paper, chips],
   );
 
   const htmlRef = useRef(html);
@@ -296,9 +282,6 @@ export default function App() {
               chips={chips}
               onChips={setChips}
               hasChips={hasChips}
-              links={links}
-              code={code}
-              onCode={setCodeChoice}
               pageCount={pageCount}
             />
           )}

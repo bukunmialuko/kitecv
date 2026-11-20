@@ -99,12 +99,6 @@ These are load-bearing. Breaking one silently degrades the output.
   alone stops at the page margin and leaves a white frame round every PDF
   sheet. `pageCss()` emits it, because `@page` cannot read a custom property;
   templates own only the ink, under `:root[data-paper="dark"]`.
-- **The QR code has to scan.** `qr.test.ts` replays the drawn SVG path into
-  pixels and decodes it with jsQR. On black paper the code stays dark modules
-  on a white tile — inverted codes are not read by every phone camera. Its box
-  is the same size on both papers, so toggling paper moves nothing. It closes
-  the document in `.code-card`, captioned with the address it opens — never in
-  the header, where a dense square competed with the name for the first glance.
 - **Entries are allowed to span pages.** `break-inside: avoid` on `.entry` was
   removed: it pushed tall roles whole and left dead space behind them. The narrow
   rules that replaced it (header `break-after: avoid`, `li break-inside: avoid`,

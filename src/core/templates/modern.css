@@ -51,10 +51,6 @@
   --chip-bg: #f1f1f1;
   --sep: #b0b0b0;
 
-  --qr-size: 40pt;
-  --qr-pad: 3pt;
-  --qr-ground: transparent;
-  --qr-ink: var(--ink);
 
   /* The shared scale, one step per level of the hierarchy:
    *   xs 2pt   contact rows
@@ -73,7 +69,7 @@
 }
 
 /* Black paper (#222222): colours only, so pagination is identical on either
- * paper. The code keeps dark-on-white so every phone camera reads it. */
+ * paper. */
 :root[data-paper="dark"] {
   --ink: #ffffff;
   --ink-soft: #d9d9d9;
@@ -82,8 +78,6 @@
   --divider: #3a3a3a;
   --chip-bg: #2f2f2f;
   --sep: #6e6e6e;
-  --qr-ground: #ffffff;
-  --qr-ink: #222222;
 }
 
 *,
@@ -438,62 +432,4 @@ code {
   padding: 0.5pt 2.5pt;
   background: var(--chip-bg);
   border-radius: 3pt;
-}
-
-/* ------------------------------------------------------------- code card --- */
-
-/*
- * The QR code closes the CV: a hairline, then "Scan to open" and the address,
- * right-aligned beside the code. It never splits, and never starts a page on
- * its own — Chrome keeps it with the content above (`break-before: avoid` is a
- * no-op in the Paged.js preview; see CLAUDE.md).
- */
-.code-card {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--gap-md);
-  margin-top: var(--gap-lg);
-  padding-top: var(--gap-md);
-  border-top: 1px solid var(--divider);
-  break-inside: avoid;
-  page-break-inside: avoid;
-  break-before: avoid;
-  page-break-before: avoid;
-}
-
-.code-text {
-  text-align: right;
-  line-height: 1.4;
-}
-
-.code-label {
-  font-size: var(--fs-meta);
-  font-weight: var(--fw-medium);
-  color: var(--ink-muted);
-}
-
-.code-url {
-  font-size: var(--fs-contact);
-  color: var(--ink-soft);
-}
-
-/* A fixed box on both papers, so switching never moves a line: on white the
- * padding is quiet zone, on black it is the white tile the code needs. */
-.qr {
-  flex: none;
-  display: block;
-  width: var(--qr-size);
-  height: var(--qr-size);
-  padding: var(--qr-pad);
-  background: var(--qr-ground);
-  color: var(--qr-ink);
-  border-radius: 3pt;
-}
-
-.qr-code {
-  display: block;
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
 }

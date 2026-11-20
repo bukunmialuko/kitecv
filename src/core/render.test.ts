@@ -152,36 +152,6 @@ describe("paper", () => {
   });
 });
 
-describe("qr", () => {
-  const url = "https://linkedin.com/in/jordanavery";
-
-  it("prints no code unless one is asked for", () => {
-    expect(renderBody(cv(sampleMarkdown))).not.toContain('class="qr"');
-  });
-
-  // The header stays name and contacts only; the code closes the document,
-  // captioned with the address it opens.
-  it("closes the CV with a captioned code card, never in the header", () => {
-    const html = renderBody(cv(sampleMarkdown), { qr: url });
-    const header = html.slice(0, html.indexOf("</header>"));
-    expect(header).not.toContain("qr");
-    const card = html.slice(html.indexOf('<aside class="code-card">'));
-    expect(html.lastIndexOf("</section>")).toBeLessThan(html.indexOf('<aside class="code-card">'));
-    expect(card).toContain("Scan to open");
-    expect(card).toContain(`<a class="code-url" href="${url}">linkedin.com/in/jordanavery</a>`);
-    expect(card).toContain(`<a class="qr" href="${url}"`);
-    expect(card).toContain('<svg class="qr-code"');
-  });
-
-  it("escapes the URL it links to", () => {
-    expect(renderBody(cv(sampleMarkdown), { qr: 'https://x.example/"><b>' })).not.toContain('"><b>');
-  });
-
-  it("treats a blank URL as no code", () => {
-    expect(renderBody(cv(sampleMarkdown), { qr: "  " })).not.toContain('class="qr"');
-  });
-});
-
 /**
  * Fonts hang off the template rather than the document, and this is the test
  * that keeps them there. Each family costs 50-150KB once base64-inlined, so the
