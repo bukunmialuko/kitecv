@@ -177,7 +177,10 @@ a[href]:hover {
 /* The one place Archivo appears. Tight negative tracking is what keeps a long
  * name from reading as a banner. */
 .name {
-  margin: 0;
+  /* Optical margin: a 30pt capital carries side-bearing the body text does not,
+   * so set flush it starts 0.45pt inside the column the text below starts on.
+   * Pulled back by measurement to share one left edge. */
+  margin: 0 0 0 -0.015em;
   font-family: var(--font-display);
   font-size: var(--fs-name);
   font-weight: var(--fw-name);
@@ -201,6 +204,10 @@ a[href]:hover {
  * icons form a straight vertical column down the right edge. */
 .contact {
   flex: none;
+  /* Drops the first row so its capitals start level with the name's: one top
+   * line across the header. Measured in Chrome — the line boxes alone left the
+   * contacts 1pt high. Re-measure if the name or contact size changes. */
+  margin-top: 1pt;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

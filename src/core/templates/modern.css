@@ -153,7 +153,10 @@ a[href]:hover {
 }
 
 .name {
-  margin: 0;
+  /* Optical margin: a 26pt capital carries side-bearing the body text does not,
+   * so set flush it starts 0.9pt inside the column the text below starts on.
+   * Pulled back by measurement to share one left edge. */
+  margin: 0 0 0 -0.034em;
   font-size: var(--fs-name);
   font-weight: var(--fw-semi);
   letter-spacing: -0.035em;
@@ -171,6 +174,10 @@ a[href]:hover {
  * icons form a straight vertical column down the right edge. */
 .contact {
   flex: none;
+  /* Drops the first row so its capitals start level with the name's: one top
+   * line across the header. Measured in Chrome — the line boxes alone left the
+   * contacts 0.54pt high. Re-measure if the name or contact size changes. */
+  margin-top: 0.54pt;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

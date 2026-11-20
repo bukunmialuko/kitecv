@@ -191,6 +191,10 @@ a[href]:hover {
  * icons form a straight vertical column down the right edge. */
 .contact {
   flex: none;
+  /* Drops the first row so its capitals start level with the name's: one top
+   * line across the header. Measured in Chrome — the line boxes alone left the
+   * contacts 0.67pt high. Re-measure if the name or contact size changes. */
+  margin-top: 0.67pt;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -456,7 +460,10 @@ a[href]:hover {
   content: "";
   position: absolute;
   left: calc(var(--bullet-indent) * -1);
-  top: 0.5em;
+  /* Centred on the x-height, where the eye reads a lowercase line: measured in
+   * Chrome against the first line's baseline. 0.5em sat 1.5pt high, nearer the
+   * capitals. Re-measure if the leading or body size changes. */
+  top: 0.66em;
   width: 3.1pt;
   height: 3.1pt;
   background: var(--ink);
