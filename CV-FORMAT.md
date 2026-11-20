@@ -19,7 +19,7 @@ projects: true
 
 # Jordan Avery
 Software Engineer
-Bristol, United Kingdom | +44 7700 900123
+Bristol, UK | +44 7700 900123
 jordan.avery@example.com
 linkedin.com/in/jordanavery
 github.com/jordanavery
@@ -105,7 +105,7 @@ Dates are checked; see [Report](#report) below.
 ```markdown
 # Jordan Avery
 Software Engineer
-Bristol, United Kingdom | +44 7700 900123
+Bristol, UK | +44 7700 900123
 jordan.avery@example.com
 ```
 
