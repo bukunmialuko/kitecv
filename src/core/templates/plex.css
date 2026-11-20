@@ -60,8 +60,11 @@
   --ink-soft: #2b2b2b;
   --ink-softer: #3d3d3d;
   --ink-muted: #6f6f6f;
-  --rule: #111111;
-  --divider: #d8d8d8;
+  /* The section hairline, a light grey rather than ink: the mono title above it
+   * is what announces a section, and the 24pt of air over it is what separates
+   * one. An ink rule under every title out-shouted the title and striped the
+   * page into bands. */
+  --rule: #c8c8c8;
   --chip-bg: #f4f4f4;
   --chip-border: #e4e4e4;
   --sep: #9a9a9a;
@@ -100,8 +103,7 @@
   --ink-soft: #dedede;
   --ink-softer: #c9c9c9;
   --ink-muted: #a0a0a0;
-  --rule: #ffffff;
-  --divider: #3c3c3c;
+  --rule: #4a4a4a;
   --chip-bg: #2e2e2e;
   --chip-border: #3c3c3c;
   --sep: #6e6e6e;
