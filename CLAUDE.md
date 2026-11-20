@@ -99,6 +99,12 @@ These are load-bearing. Breaking one silently degrades the output.
   which every template must style (`--accent`, plus `--accent-glow` on black
   paper) — an unstyled `<mark>` gets the browser's yellow background. Colour,
   weight and glow only, so a highlight never moves a line.
+- **No blurred shadows in the CV — `text-shadow` or `box-shadow` with a blur.**
+  Chrome cannot write a blur into a PDF as vectors: it rasterises each one into
+  an image behind a soft mask, and macOS Preview draws those as solid boxes. The
+  neon glow is an opaque radial gradient that fades into `--paper` instead.
+  Check a PDF for `/SMask` before trusting a new effect, and view it in Preview
+  (`sips` renders with the same engine), not only poppler.
 - **The CV's colours follow its paper, never the app theme.** White paper or
   black (`#222222`, white ink) is a document setting, like the template; the
   shell's light/dark toggle never reaches the iframe. Paper swaps colour tokens

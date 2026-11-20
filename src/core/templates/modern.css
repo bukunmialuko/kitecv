@@ -85,7 +85,9 @@
   --chip-bg: #2f2f2f;
   --sep: #6e6e6e;
   --accent: #4ade80;
-  --accent-glow: rgba(74, 222, 128, 0.45);
+  /* The halo's core: the accent at 30% over the paper, as an opaque colour
+   * (#4ade80 over #222222), so the gradient needs no transparency. */
+  --accent-glow: #2e5a3e;
 }
 
 *,
@@ -460,8 +462,9 @@ code {
 
 /*
  * `***text***` — the one colour a CV carries, for the numbers that prove the
- * work. A deep green on white (5.0:1); on black paper a brighter green (9.1:1)
- * with a soft glow, the neon that only reads as light against a dark page.
+ * work. A deep green on white (5.0:1); on black paper a brighter green (9.1:1,
+ * still 4.6:1 at the halo's brightest) with a soft glow, the neon that only
+ * reads as light against a dark page.
  * Colour, weight and glow only — never a size or spacing — so highlighting a
  * number cannot move a line.
  */
@@ -471,8 +474,20 @@ mark {
   font-weight: var(--fw-semi);
 }
 
+/*
+ * The neon is a radial gradient, not a text-shadow. Chrome cannot write a
+ * blurred shadow into a PDF as vectors, so it rasterised each one into an image
+ * behind a soft mask — and macOS Preview drew those as solid green boxes. A
+ * gradient is a vector shading, and every stop here is opaque, fading out into
+ * the paper colour itself, so no viewer has a mask to get wrong.
+ *
+ * The padding stays under a space's width and the negative margin cancels it,
+ * so the halo widens without moving a glyph or covering the letter before it.
+ */
 :root[data-paper="dark"] mark {
-  text-shadow: 0 0 0.45em var(--accent-glow);
+  padding: 0 0.2em;
+  margin: 0 -0.2em;
+  background: radial-gradient(closest-side, var(--accent-glow), var(--paper, #222222));
 }
 
 /* Running text is the soft grey, so plain bold has to step up to full ink to
